@@ -172,7 +172,7 @@ class ModelAgnosticQSARPipeline:
                 print("[STEP 1] Removing duplicates BEFORE splitting...")
             
             processor = QSARDataProcessor(self.smiles_col, self.target_col)
-            df_clean = processor.remove_duplicates(df, method='smiles')
+            df_clean = processor.remove_duplicates(df, strategy='average')
             
             n_removed = len(df) - len(df_clean)
             if verbose:
@@ -198,8 +198,9 @@ class ModelAgnosticQSARPipeline:
             )
             
             # Verify zero scaffold overlap
-            train_scaffolds = set(df.iloc[train_idx][splitter.scaffold_col])
-            test_scaffolds = set(df.iloc[test_idx][splitter.scaffold_col])
+            # Get scaffolds for train and test sets
+            train_scaffolds = set([splitter.get_scaffold(s) for s in df.iloc[train_idx][self.smiles_col]])
+            test_scaffolds = set([splitter.get_scaffold(s) for s in df.iloc[test_idx][self.smiles_col]])
             overlap = train_scaffolds & test_scaffolds
             
             if verbose:
@@ -299,9 +300,9 @@ class ModelAgnosticQSARPipeline:
         
         calculator = PerformanceMetricsCalculator()
         
-        train_metrics = calculator.calculate_all_metrics(y_train, y_train_pred, name='Train')
-        val_metrics = calculator.calculate_all_metrics(y_val, y_val_pred, name='Validation')
-        test_metrics = calculator.calculate_all_metrics(y_test, y_test_pred, name='Test')
+        train_metrics = calculator.calculate_all_metrics(y_train, y_train_pred, set_name='Train')
+        val_metrics = calculator.calculate_all_metrics(y_val, y_val_pred, set_name='Validation')
+        test_metrics = calculator.calculate_all_metrics(y_test, y_test_pred, set_name='Test')
         
         if verbose:
             print(f"\n  Train:      R² = {train_metrics['r2']:.3f}, RMSE = {train_metrics['rmse']:.3f}")
