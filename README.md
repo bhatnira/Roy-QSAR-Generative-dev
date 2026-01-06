@@ -34,23 +34,54 @@ This framework provides **ONLY individual modules** - no all-in-one pipelines, n
 | # | Module | Purpose | When to Use |
 |---|--------|---------|-------------|
 | 1 | `DuplicateRemoval` | Remove duplicate molecules | Before any data splitting |
-| 2 | `ScaffoldSplitter` | Split by molecular scaffolds | For realistic generalization estimates |
-| 3 | `FeatureScaler` | Scale features properly | When normalizing features (no leakage) |
-| 4 | `CrossValidator` | Perform k-fold cross-validation | For model evaluation |
-| 5 | `PerformanceMetrics` | Calculate comprehensive metrics | For performance analysis |
-| 6 | `DatasetBiasAnalysis` | Detect dataset bias | To check data quality issues |
-| 7 | `ModelComplexityAnalysis` | Analyze model complexity | To detect overfitting risk |
+| 2 | **`AdvancedSplitter`** | **Split data (3 strategies!)** | **Choose your splitting strategy** |
+| 3 | **`FeatureScaler`** | **Scale features (no leakage!)** | **Fit on train fold only** |
+| 4 | **`FeatureSelector`** | **Select features (nested CV!)** | **Within each CV fold** |
+| 5 | **`PCATransformer`** | **Reduce dimensions (no leakage!)** | **Fit on train fold only** |
+| 6 | `CrossValidator` | Perform k-fold cross-validation | For model evaluation |
+| 7 | `PerformanceMetrics` | Calculate comprehensive metrics | For performance analysis |
+| 8 | `DatasetBiasAnalysis` | Detect dataset bias | To check data quality issues |
+| 9 | `ModelComplexityAnalysis` | Analyze model complexity | To detect overfitting risk |
 
 **Each module is independent. Use any, all, or none. Mix with your own code.**
+
+### 🎯 Three Splitting Strategies Available!
+
+The `AdvancedSplitter` module supports **three different splitting strategies** - choose the best one for your data:
+
+| Strategy | When to Use | How It Works | Pros |
+|----------|-------------|--------------|------|
+| **Scaffold** ⭐ | Most QSAR tasks (RECOMMENDED) | Splits by Bemis-Murcko scaffolds | Industry standard, prevents scaffold leakage |
+| **Temporal** 📅 | When you have date/time data | Train on older, test on newer | Simulates realistic deployment |
+| **Cluster** 🔗 | Small datasets (< 100 compounds) | Clusters by fingerprint similarity | Good for diverse, small datasets |
+
+```python
+# Strategy 1: Scaffold-based (RECOMMENDED)
+from qsar_validation.splitting_strategies import ScaffoldSplitter
+splitter = ScaffoldSplitter(smiles_col='SMILES')
+train_idx, val_idx, test_idx = splitter.split(df, test_size=0.2)
+
+# Strategy 2: Time-based (when you have dates)
+from qsar_validation.splitting_strategies import TemporalSplitter
+splitter = TemporalSplitter(smiles_col='SMILES', date_col='Date')
+train_idx, val_idx, test_idx = splitter.split(df, test_size=0.2)
+
+# Strategy 3: Leave-cluster-out (for small datasets)
+from qsar_validation.splitting_strategies import ClusterSplitter
+splitter = ClusterSplitter(smiles_col='SMILES', n_clusters=5)
+train_idx, val_idx, test_idx = splitter.split(df, test_size=0.2)
+```
+
+**📖 See [`examples/splitting_strategies_examples.py`](examples/splitting_strategies_examples.py) for complete examples!**
 
 ---
 
 ## 🚀 Quick Start
 
-### Minimal Example (Just 3 Modules)
+### Minimal Example (3 Modules)
 ```python
 from qsar_validation.duplicate_removal import DuplicateRemoval
-from qsar_validation.scaffold_splitting import ScaffoldSplitter
+from qsar_validation.splitting_strategies import ScaffoldSplitter  # or TemporalSplitter, ClusterSplitter
 from qsar_validation.performance_metrics import PerformanceMetrics
 import pandas as pd
 
@@ -61,7 +92,7 @@ df = pd.read_csv('my_data.csv')
 remover = DuplicateRemoval(smiles_col='SMILES')
 df = remover.remove_duplicates(df, strategy='average')
 
-# Module 2: Split by scaffolds
+# Module 2: Split by scaffolds (RECOMMENDED - prevents data leakage!)
 splitter = ScaffoldSplitter(smiles_col='SMILES')
 train_idx, val_idx, test_idx = splitter.split(df, test_size=0.2)
 
@@ -74,7 +105,49 @@ results = metrics.calculate_all_metrics(y_true, y_pred, set_name='Test')
 print(results)
 ```
 
-That's it! Three modules, full control, no magic.
+### Feature Engineering Example (Proper CV)
+```python
+from qsar_validation.feature_scaling import FeatureScaler
+from qsar_validation.feature_selection import FeatureSelector
+from qsar_validation.pca_module import PCATransformer
+from sklearn.model_selection import KFold
+
+# CRITICAL: All feature engineering happens WITHIN each CV fold!
+
+for train_idx, val_idx in KFold(n_splits=5).split(X_train):
+    X_train_fold = X_train[train_idx]
+    X_val_fold = X_train[val_idx]
+    
+    # Fit scaler on train fold only
+    scaler = FeatureScaler(method='standard')
+    scaler.fit(X_train_fold)
+    X_train_scaled = scaler.transform(X_train_fold)
+    X_val_scaled = scaler.transform(X_val_fold)
+    
+    # Select features on train fold only
+    selector = FeatureSelector(method='univariate', n_features=50)
+    selector.fit(X_train_scaled, y_train[train_idx])
+    X_train_selected = selector.transform(X_train_scaled)
+    X_val_selected = selector.transform(X_val_scaled)
+    
+    # Fit PCA on train fold only
+    pca = PCATransformer(n_components=0.95)  # Keep 95% variance
+    pca.fit(X_train_selected)
+    X_train_pca = pca.transform(X_train_selected)
+    X_val_pca = pca.transform(X_val_selected)
+    
+    # Train model on processed features
+    model.fit(X_train_pca, y_train[train_idx])
+    score = model.score(X_val_pca, y_train[val_idx])
+```
+
+**⚠️ CRITICAL:** Feature scaling, selection, and PCA must be fitted **WITHIN** each CV fold to prevent data leakage!
+
+**📖 See [`examples/feature_engineering_examples.py`](examples/feature_engineering_examples.py) for 5 complete examples!**
+
+That's it! Independent modules, full control, no magic.
+
+**💡 Pro Tip:** Use `TemporalSplitter` if you have dates, or `ClusterSplitter` for small datasets!
 
 ---
 
@@ -208,7 +281,7 @@ print(f"MAE: {results['Test_MAE']:.3f}")
 
 ## 🛡️ Data Leakage Prevention
 
-Three modules work together to prevent all types of data leakage:
+**Six modules** work together to prevent all types of data leakage:
 
 ### 1️⃣ DuplicateRemoval
 **Prevents:** Duplicates appearing in both train and test sets
@@ -228,15 +301,18 @@ df = remover.remove_duplicates(df, strategy='average')
 has_dups = remover.check_duplicates(df)
 ```
 
-### 2️⃣ ScaffoldSplitter
-**Prevents:** Similar molecules (same scaffold) in train and test sets
+### 2️⃣ AdvancedSplitter (Three Strategies!)
+**Prevents:** Similar molecules in train and test sets
 
 ```python
-from qsar_validation.scaffold_splitting import ScaffoldSplitter
+from qsar_validation.splitting_strategies import (
+    ScaffoldSplitter,    # Strategy 1: Scaffold-based (RECOMMENDED)
+    TemporalSplitter,    # Strategy 2: Time-based
+    ClusterSplitter      # Strategy 3: Leave-cluster-out
+)
 
+# RECOMMENDED: Scaffold-based splitting
 splitter = ScaffoldSplitter(smiles_col='SMILES')
-
-# Split by Bemis-Murcko scaffolds
 train_idx, val_idx, test_idx = splitter.split(
     df, 
     test_size=0.2,
@@ -250,20 +326,111 @@ print(f"Scaffold overlap: {overlap}")  # Should be 0
 
 # Get scaffold for a specific molecule
 scaffold = splitter.get_scaffold('c1ccccc1CC')
+
+# ALTERNATIVE: Time-based splitting (if you have dates)
+splitter = TemporalSplitter(smiles_col='SMILES', date_col='Date')
+train_idx, val_idx, test_idx = splitter.split(df, test_size=0.2)
+
+# ALTERNATIVE: Cluster-based splitting (for small datasets)
+splitter = ClusterSplitter(smiles_col='SMILES', n_clusters=5)
+train_idx, val_idx, test_idx = splitter.split(df, test_size=0.2)
 ```
 
 ### 3️⃣ FeatureScaler
 **Prevents:** Using test set statistics to scale features
+**CRITICAL:** Fit on train fold only!
 
 ```python
 from qsar_validation.feature_scaling import FeatureScaler
 
-scaler = FeatureScaler(method='standard')  # or 'minmax', 'robust'
+# CORRECT: Within CV fold
+for train_idx, val_idx in cv_folds:
+    scaler = FeatureScaler(method='standard')  # or 'minmax', 'robust'
+    scaler.fit(X_train[train_idx])  # ✓ Fit on train fold only
+    X_train_scaled = scaler.transform(X_train[train_idx])
+    X_val_scaled = scaler.transform(X_train[val_idx])
+    
+# WRONG: Fit on all training data before CV
+scaler.fit(X_train)  # ❌ LEAKAGE!
+X_scaled = scaler.transform(X_train)
+cv_score = cross_val_score(model, X_scaled, y)  # ❌ LEAKAGE!
+```
 
-# CORRECT: Fit on train only, transform both
-scaler.fit(X_train)  # Learn statistics from train only
-X_train_scaled = scaler.transform(X_train)
-X_test_scaled = scaler.transform(X_test)
+### 4️⃣ FeatureSelector
+**Prevents:** Using validation data to select features
+**CRITICAL:** Use nested CV!
+
+```python
+from qsar_validation.feature_selection import FeatureSelector
+
+# CORRECT: Select features within CV fold
+for train_idx, val_idx in cv_folds:
+    selector = FeatureSelector(method='univariate', n_features=50)
+    selector.fit(X_train[train_idx], y_train[train_idx])  # ✓ This fold only
+    X_train_selected = selector.transform(X_train[train_idx])
+    X_val_selected = selector.transform(X_train[val_idx])
+    
+# WRONG: Select features before CV
+selector.fit(X_train, y_train)  # ❌ LEAKAGE!
+X_selected = selector.transform(X_train)
+cv_score = cross_val_score(model, X_selected, y)  # ❌ LEAKAGE!
+```
+
+### 5️⃣ PCATransformer
+**Prevents:** Learning PCA from validation/test data
+**CRITICAL:** Fit on train fold only!
+
+```python
+from qsar_validation.pca_module import PCATransformer
+
+# CORRECT: Fit PCA within CV fold
+for train_idx, val_idx in cv_folds:
+    pca = PCATransformer(n_components=0.95)  # Keep 95% variance
+    pca.fit(X_train[train_idx])  # ✓ Fit on train fold only
+    X_train_pca = pca.transform(X_train[train_idx])
+    X_val_pca = pca.transform(X_train[val_idx])
+    
+# WRONG: Fit PCA before CV
+pca.fit(X_train)  # ❌ LEAKAGE!
+X_pca = pca.transform(X_train)
+cv_score = cross_val_score(model, X_pca, y)  # ❌ LEAKAGE!
+```
+
+### 6️⃣ Complete Feature Engineering Pipeline (No Leakage!)
+
+```python
+from sklearn.model_selection import KFold
+
+# CORRECT: All steps within each CV fold
+for train_idx, val_idx in KFold(n_splits=5).split(X_train):
+    # 1. Scale
+    scaler = FeatureScaler(method='standard')
+    scaler.fit(X_train[train_idx])
+    X_train_scaled = scaler.transform(X_train[train_idx])
+    X_val_scaled = scaler.transform(X_train[val_idx])
+    
+    # 2. Select features
+    selector = FeatureSelector(method='univariate', n_features=50)
+    selector.fit(X_train_scaled, y_train[train_idx])
+    X_train_selected = selector.transform(X_train_scaled)
+    X_val_selected = selector.transform(X_val_scaled)
+    
+    # 3. Apply PCA
+    pca = PCATransformer(n_components=0.95)
+    pca.fit(X_train_selected)
+    X_train_pca = pca.transform(X_train_selected)
+    X_val_pca = pca.transform(X_val_selected)
+    
+    # 4. Train model
+    model.fit(X_train_pca, y_train[train_idx])
+    score = model.score(X_val_pca, y_train[val_idx])
+```
+
+**⚠️ THE GOLDEN RULE:**
+- **Scaling:** Fit on train fold only
+- **Feature Selection:** Use nested CV
+- **PCA:** Fit on train fold only
+- **Never fit ANY transformation on validation or test data!**
 
 # Or use fit_transform for train
 X_train_scaled = scaler.fit_transform(X_train)
