@@ -1,10 +1,10 @@
 # QSAR Models
 
-**A Purely Modular QSAR Validation Framework**
+**A Purely Modular QSAR Validation Framework with Pitfall Mitigation**
 
-**Version 3.0.0 - Independent Modules, Maximum Flexibility**
+**Version 4.0.0 - Comprehensive QSAR Best Practices**
 
-A professional framework of **7 independent, composable modules** for QSAR validation. Perfect for the low-data regime (< 200 compounds). **We provide the building blocks, you build the workflow.**
+A professional framework of **13 independent, composable modules** for QSAR validation with built-in mitigation for all common pitfalls. Perfect for the low-data regime (< 200 compounds). **We provide the building blocks, you build the workflow.**
 
 ## 🧩 Framework Philosophy
 
@@ -21,15 +21,19 @@ This framework provides **ONLY individual modules** - no all-in-one pipelines, n
 - ✅ Your complete workflow
 
 **We provide:**
-- ✅ 7 independent, tested modules
+- ✅ 13 independent, tested modules
 - ✅ Clear documentation for each
 - ✅ Examples of combinations
 - ✅ Data leakage prevention tools
+- ✅ QSAR pitfall mitigation tools
 - ✅ Validation analysis tools
+- ✅ Comprehensive best practices guide
 
 ---
 
 ## 📦 Available Modules
+
+### Core Modules (Data Splitting & Feature Engineering)
 
 | # | Module | Purpose | When to Use |
 |---|--------|---------|-------------|
@@ -38,10 +42,24 @@ This framework provides **ONLY individual modules** - no all-in-one pipelines, n
 | 3 | **`FeatureScaler`** | **Scale features (no leakage!)** | **Fit on train fold only** |
 | 4 | **`FeatureSelector`** | **Select features (nested CV!)** | **Within each CV fold** |
 | 5 | **`PCATransformer`** | **Reduce dimensions (no leakage!)** | **Fit on train fold only** |
-| 6 | `CrossValidator` | Perform k-fold cross-validation | For model evaluation |
-| 7 | `PerformanceMetrics` | Calculate comprehensive metrics | For performance analysis |
-| 8 | `DatasetBiasAnalysis` | Detect dataset bias | To check data quality issues |
-| 9 | `ModelComplexityAnalysis` | Analyze model complexity | To detect overfitting risk |
+
+### Pitfall Mitigation Modules (NEW!)
+
+| # | Module | Mitigates | What It Does |
+|---|--------|-----------|--------------|
+| 6 | **`DatasetQualityAnalyzer`** | Dataset bias, narrow chemical space | Analyzes scaffold diversity, chemical space coverage, activity distribution |
+| 7 | **`ModelComplexityController`** | Overfitting, excessive complexity | Recommends models, restricts hyperparameters, implements nested CV |
+| 8 | **`PerformanceValidator`** | Improper CV, wrong metrics | Proper CV reporting, comprehensive metrics, baseline comparison |
+| 9 | **`ActivityCliffsDetector`** | Activity cliffs, local instability | Identifies structure-activity cliffs, assesses severity |
+| 10 | **`UncertaintyEstimator`** | Point predictions, no confidence | Provides uncertainty estimates, confidence intervals, applicability domain |
+
+### Analysis & Reporting Modules
+
+| # | Module | Purpose | When to Use |
+|---|--------|---------|-------------|
+| 11 | `CrossValidator` | Perform k-fold cross-validation | For model evaluation |
+| 12 | `PerformanceMetrics` | Calculate comprehensive metrics | For performance analysis |
+| 13 | `DatasetBiasAnalysis` | Detect dataset bias | Legacy - use DatasetQualityAnalyzer |
 
 **Each module is independent. Use any, all, or none. Mix with your own code.**
 
@@ -144,6 +162,38 @@ for train_idx, val_idx in KFold(n_splits=5).split(X_train):
 **⚠️ CRITICAL:** Feature scaling, selection, and PCA must be fitted **WITHIN** each CV fold to prevent data leakage!
 
 **📖 See [`examples/feature_engineering_examples.py`](examples/feature_engineering_examples.py) for 5 complete examples!**
+
+### QSAR Pitfalls Mitigation Example
+```python
+from qsar_validation.dataset_quality_analysis import DatasetQualityAnalyzer
+from qsar_validation.model_complexity_control import ModelComplexityController
+from qsar_validation.performance_validation import PerformanceValidator
+
+# 1. Analyze dataset quality
+analyzer = DatasetQualityAnalyzer(smiles_col='SMILES', activity_col='pIC50')
+quality_report = analyzer.analyze(df)
+
+# 2. Get model recommendations based on dataset size
+controller = ModelComplexityController(
+    n_samples=X_train.shape[0],
+    n_features=X_train.shape[1]
+)
+recommendations = controller.recommend_models()
+
+# 3. Run proper validation with controls
+validator = PerformanceValidator()
+
+# Cross-validation with proper reporting
+cv_results = validator.cross_validate_properly(X_train, y_train, model)
+
+# Y-randomization test (negative control)
+random_test = validator.y_randomization_test(X_train, y_train, model)
+
+# Baseline comparison
+baseline_comparison = validator.compare_to_baseline(y_test, y_pred)
+```
+
+**📖 See [`QSAR_PITFALLS_MITIGATION_GUIDE.md`](QSAR_PITFALLS_MITIGATION_GUIDE.md) for complete guide covering all 13 common pitfalls!**
 
 That's it! Independent modules, full control, no magic.
 
