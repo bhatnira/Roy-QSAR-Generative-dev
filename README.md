@@ -1,0 +1,207 @@
+# QSAR Models
+
+**A Modular and Reproducible Framework**
+
+A professional, modular framework for developing and validating QSAR (Quantitative Structure-Activity Relationship) models with proper validation protocols to prevent data leakage and overfitting.
+
+## Project Structure
+
+```
+QSAR_Models/
+├── notebooks/              # Jupyter notebooks with model implementations
+│   ├── Model_1_circular_fingerprint_features_1024_H20_autoML_Model_Interpretation.ipynb
+│   ├── Model_2_ChEBERTa_embedding_linear_regression_no_interpretation.ipynb
+│   ├── Model_3_rdkit_features_H20_autoML.ipynb
+│   ├── Model_4_circular_fingerprint_features_1024_Gaussian_Process_Bayesian_Optimization_Model_Interpretation.ipynb
+│   └── DATA_LEAKAGE_FIX_EXAMPLE.ipynb
+│
+├── src/                    # Source code
+│   ├── qsar_validation/   # Modular validation package
+│   │   ├── __init__.py
+│   │   ├── dataset_analysis.py      # Dataset bias and scaffold diversity
+│   │   ├── activity_cliffs.py       # Activity cliff detection
+│   │   ├── model_complexity.py      # Model complexity analysis
+│   │   ├── metrics.py              # Performance metrics
+│   │   ├── randomization.py        # Y-randomization testing
+│   │   ├── assay_noise.py          # Experimental error estimation
+│   │   └── validation_runner.py    # Main orchestrator
+│   │
+│   └── utils/             # Utility functions
+│       ├── qsar_utils_no_leakage.py      # Leakage-free utilities
+│       └── qsar_validation_utils.py      # Legacy validation utils
+│
+├── docs/                   # Documentation
+│   ├── README.md                          # Main documentation
+│   ├── INDEX.md                           # Documentation index
+│   ├── START_HERE.md                      # Getting started guide
+│   ├── QUICK_START_FIX.md                 # Quick fixes for common issues
+│   ├── COMPREHENSIVE_VALIDATION_GUIDE.md  # Complete validation guide
+│   └── ... (more documentation files)
+│
+├── examples/              # Example scripts and use cases
+│   ├── 01_basic_validation.py            # Basic validation example
+│   └── 02_custom_workflow.py             # Custom workflow example
+│
+├── tests/                 # Unit tests
+│   └── test_validation.py                # Test suite
+│
+├── setup.py              # Package installation configuration
+├── requirements.txt      # Python dependencies
+└── .gitignore           # Git ignore rules
+```
+
+## Features
+
+### Comprehensive Validation Framework
+
+- **Dataset Bias Analysis**: Scaffold diversity, chemical space coverage
+- **Activity Cliff Detection**: Identify SAR discontinuities
+- **Model Complexity Control**: Prevent overfitting in low-data regimes
+- **Performance Metrics**: RMSE, MAE, R², Spearman rho with baselines
+- **Y-Randomization Testing**: Detect spurious correlations
+- **Assay Noise Estimation**: Context for achievable performance
+
+### Data Leakage Prevention
+
+- Scaffold-based splitting (not random)
+- Proper cross-validation workflows
+- Feature scaling within CV loops
+- No information leakage from test sets
+
+### Multiple Model Implementations
+
+1. **Model 1**: Circular Fingerprints (1024-bit) + H2O AutoML
+2. **Model 2**: ChEBERTa Embeddings + Linear Regression
+3. **Model 3**: RDKit Descriptors + H2O AutoML
+4. **Model 4**: Circular Fingerprints + Gaussian Process + Bayesian Optimization
+
+## Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/bhatnira/Roy-QSAR-Generative-dev.git
+cd Roy-QSAR-Generative-dev
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Install the package in development mode
+pip install -e .
+```
+
+## Quick Start
+
+### Using the Validation Package
+
+```python
+from src.qsar_validation import run_comprehensive_validation
+
+# Run comprehensive validation on your dataset
+results = run_comprehensive_validation(
+    df, 
+    smiles_col='Canonical SMILES',
+    target_col='IC50 uM'
+)
+```
+
+### Using Individual Validators
+
+```python
+from src.qsar_validation import (
+    DatasetBiasAnalyzer,
+    ActivityCliffDetector,
+    ModelComplexityAnalyzer
+)
+
+# Analyze dataset bias
+analyzer = DatasetBiasAnalyzer('SMILES', 'IC50')
+diversity = analyzer.analyze_scaffold_diversity(df)
+
+# Detect activity cliffs
+cliff_detector = ActivityCliffDetector('SMILES', 'IC50')
+cliffs = cliff_detector.detect_activity_cliffs(df)
+
+# Check model complexity
+ModelComplexityAnalyzer.analyze_complexity(
+    n_samples=len(df),
+    n_features=1024,
+    model_type='random_forest'
+)
+```
+
+## Documentation
+
+- **[START_HERE.md](docs/START_HERE.md)** - Begin here for an overview
+- **[INDEX.md](docs/INDEX.md)** - Complete documentation index
+- **[COMPREHENSIVE_VALIDATION_GUIDE.md](docs/COMPREHENSIVE_VALIDATION_GUIDE.md)** - Full validation guide
+- **[QUICK_REFERENCE_CARD.md](docs/QUICK_REFERENCE_CARD.md)** - Quick reference for validation
+- **[PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md)** - Detailed structure guide
+
+## Key Validation Principles
+
+### Critical (Must Fix)
+- Scaffold-based splitting (not random)
+- Remove duplicates BEFORE splitting
+- Scale features using training data only
+- No feature selection on full dataset
+
+### High Priority (Strongly Recommended)
+- Estimate and report experimental error
+- Detect and report activity cliffs
+- Report multiple metrics (not just R²)
+- Perform y-randomization tests
+
+### Best Practices
+- Analyze target distribution
+- Provide uncertainty estimates
+- Use proper baselines (Ridge regression)
+- Report limitations honestly
+
+## Expected Performance
+
+When fixing data leakage issues, expect:
+
+- **R² drop**: 0.80 -> 0.60 (or lower) - This is NORMAL and CORRECT
+- **RMSE increase**: 0.3 -> 0.5 - More realistic for IC50 data
+- **Scaffold split harder**: Tests true generalization
+
+For IC50/EC50 assays:
+- Typical experimental error: 0.3 - 0.6 log units
+- RMSE ~0.5 is near theoretical limit
+- RMSE < 0.3 may indicate overfitting
+
+## Repository Information
+
+- **Repository**: [Roy-QSAR-Generative-dev](https://github.com/bhatnira/Roy-QSAR-Generative-dev)
+- **Owner**: bhatnira
+- **Branch**: main
+- **Version**: 2.0.0 (Modularized & Organized)
+
+## Citation
+
+If you use this framework in your research, please cite:
+
+```bibtex
+@software{qsar_validation_framework,
+  title = {QSAR Validation Framework: A Modular and Reproducible Framework},
+  author = {Roy QSAR Group},
+  year = {2026},
+  url = {https://github.com/bhatnira/Roy-QSAR-Generative-dev}
+}
+```
+
+## License
+
+[Add your license here]
+
+## Acknowledgments
+
+This framework implements best practices from:
+- Tropsha, A. (2010). Best Practices for QSAR Model Development
+- OECD Principles for QSAR Validation
+- Recent advances in scaffold-based CV and activity cliff analysis
+
+---
+
+**Version**: 2.0.0 (Modular & Reproducible)  
+**Last Updated**: January 6, 2026
