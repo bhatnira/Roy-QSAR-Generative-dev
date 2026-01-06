@@ -2,7 +2,7 @@
 QSAR Validation Package
 =======================
 
-A modular framework for comprehensive QSAR model validation.
+A modular, model-agnostic, and featurizer-agnostic framework for comprehensive QSAR validation.
 
 Modules:
 --------
@@ -13,25 +13,31 @@ Modules:
 - randomization: Y-randomization testing
 - assay_noise: Experimental error estimation
 - validation_runner: Main validation orchestrator
+- model_agnostic_pipeline: Complete model-agnostic pipeline (NEW!)
 
 Usage:
 ------
-    from qsar_validation import run_validation, DatasetAnalyzer
+    # NEW: Model-Agnostic Pipeline (Recommended)
+    from qsar_validation import ModelAgnosticQSARPipeline
     
-    # Quick validation
-    results = run_validation(df, smiles_col='SMILES', target_col='IC50')
+    pipeline = ModelAgnosticQSARPipeline(
+        featurizer=my_featurizer_function,  # Your choice!
+        model=my_sklearn_model,             # Your choice!
+        smiles_col='SMILES',
+        target_col='Activity'
+    )
+    results = pipeline.fit_predict_validate(df)
     
-    # Or use individual modules
-    from qsar_validation.dataset_analysis import DatasetBiasAnalyzer
-    analyzer = DatasetBiasAnalyzer()
-    diversity = analyzer.analyze_scaffold_diversity(df)
+    # Traditional: Individual modules
+    from qsar_validation import run_comprehensive_validation
+    results = run_comprehensive_validation(df, smiles_col='SMILES', target_col='IC50')
 
 Author: QSAR Validation Framework
 Date: January 2026
-Version: 2.0.0 (Modularized)
+Version: 3.0.0 (Model-Agnostic)
 """
 
-__version__ = "2.0.0"
+__version__ = "3.0.0"
 __author__ = "QSAR Validation Framework"
 
 # Import main classes and functions for easy access
@@ -45,8 +51,13 @@ from .validation_runner import (
     run_comprehensive_validation,
     print_comprehensive_validation_checklist
 )
+from .model_agnostic_pipeline import ModelAgnosticQSARPipeline
 
 __all__ = [
+    # Model-Agnostic Pipeline (NEW - Recommended)
+    'ModelAgnosticQSARPipeline',
+    
+    # Individual Modules
     'DatasetBiasAnalyzer',
     'ActivityCliffDetector',
     'ModelComplexityAnalyzer',

@@ -1,21 +1,56 @@
 # QSAR Models
 
-**A Modular and Reproducible Framework**
+**A Modular, Model-Agnostic, and Reproducible Framework**
 
-A professional, modular, **notebook-free** framework for developing and validating QSAR (Quantitative Structure-Activity Relationship) models with proper validation protocols to prevent data leakage and overfitting in low-data regimes.
+**Version 3.0.0 - Now Completely Model-Agnostic!**
+
+A professional, modular, **notebook-free** framework that works with ANY model and ANY featurizer. Perfect for the low-data regime (< 200 compounds). **You choose the models and features, we handle ALL data leakage prevention and validation automatically.**
+
+## 🎯 What's New in v3.0?
+
+- **Model-Agnostic**: Works with ANY sklearn-compatible model (Random Forest, XGBoost, Neural Networks, SVR, your custom models, etc.)
+- **Featurizer-Agnostic**: Works with ANY feature representation (Morgan, MACCS, RDKit descriptors, ChemBERTa embeddings, custom features, etc.)
+- **Ultra Simple**: Just 5 lines of code for complete validation
+- **Complete Freedom**: You have full control over models, features, and settings
 
 ## Key Features
 
-- **Data Leakage Prevention**: Comprehensive protection against all leakage types
-  - Scaffold-based splitting (Bemis-Murcko)
-  - Automatic duplicate removal
-  - Proper feature scaling (train stats only)
-  - No information leakage from test sets
-- **Notebook-Independent**: Use as a Python package in any workflow
-- **Low-Data Optimized**: Designed for datasets with < 200 compounds
-- **Modular Architecture**: 7 focused validation modules
-- **Production-Ready**: Import and use in scripts, pipelines, or applications
-- **Reproducible**: Fixed random seeds, documented protocols
+### 1. 🛡️ **Data Leakage Prevention** (Automatic)
+  - ✅ Scaffold-based splitting (Bemis-Murcko, zero overlap)
+  - ✅ Automatic duplicate removal (before splitting)
+  - ✅ Proper feature scaling (train stats only)
+  - ✅ Feature selection (within CV loops)
+  - ✅ Nested CV support (hyperparameter tuning)
+  - ✅ No information leakage from test sets
+
+### 2. 🎯 **Model-Agnostic** (NEW!)
+  - ✅ Works with ANY sklearn-compatible model
+  - ✅ Random Forest, XGBoost, Ridge, SVR, Neural Networks, etc.
+  - ✅ Your custom models welcome!
+
+### 3. 🧬 **Featurizer-Agnostic** (NEW!)
+  - ✅ Works with ANY featurizer function
+  - ✅ Morgan fingerprints, MACCS keys, RDKit descriptors
+  - ✅ ChemBERTa embeddings, custom features, anything!
+
+### 4. 📊 **Comprehensive Validation** (Automatic)
+  - ✅ Cross-validation (no leakage)
+  - ✅ Y-randomization tests
+  - ✅ Activity cliff detection
+  - ✅ Model complexity analysis
+  - ✅ Experimental error estimation
+
+### 5. 🚀 **Ultra Simple to Use**
+```python
+# Just 5 lines!
+pipeline = ModelAgnosticQSARPipeline(
+    featurizer=my_featurizer,  # Your choice
+    model=my_model,             # Your choice
+    smiles_col='SMILES',
+    target_col='Activity'
+)
+results = pipeline.fit_predict_validate(df)
+```
 
 ## Project Structure
 
