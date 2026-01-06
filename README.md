@@ -8,10 +8,12 @@ A professional framework of **13 independent, composable modules** for QSAR vali
 
 **We provide the building blocks, you build the workflow.**
 
+---
+
 ## 🎉 NEW in v4.1.0: Multi-Library Support!
 
 **No more sklearn lock-in!** The framework now works with:
-- ✅ **Scikit-learn** (Ridge, RandomForest, etc.)
+- ✅ **Scikit-learn** (Ridge, RandomForest, SVM, etc.)
 - ✅ **XGBoost** (XGBRegressor, XGBClassifier)
 - ✅ **LightGBM** (LGBMRegressor, LGBMClassifier)
 - ✅ **PyTorch** (custom neural networks)
@@ -20,8 +22,7 @@ A professional framework of **13 independent, composable modules** for QSAR vali
 
 Same consistent API. Maximum flexibility. Your choice!
 
-📖 **See [`MULTI_LIBRARY_SUPPORT.md`](MULTI_LIBRARY_SUPPORT.md) for complete guide!**  
-📖 **See [`examples/multi_library_examples.py`](examples/multi_library_examples.py) for working examples!**
+---
 
 ## 🧩 Framework Philosophy
 
@@ -35,16 +36,16 @@ This framework provides **ONLY individual modules** - no all-in-one pipelines, n
 - ✅ Which modules to use
 - ✅ When to use them  
 - ✅ How to combine them
+- ✅ Which ML library to use
 - ✅ Your complete workflow
 
 **We provide:**
 - ✅ 13 independent, tested modules
-- ✅ Clear documentation for each
-- ✅ Examples of combinations
+- ✅ Support for 5+ ML libraries
 - ✅ Data leakage prevention tools
 - ✅ QSAR pitfall mitigation tools
 - ✅ Validation analysis tools
-- ✅ Comprehensive best practices guide
+- ✅ Best practices enforcement
 
 ---
 
@@ -60,7 +61,7 @@ This framework provides **ONLY individual modules** - no all-in-one pipelines, n
 | 4 | **`FeatureSelector`** | **Select features (nested CV!)** | **Within each CV fold** |
 | 5 | **`PCATransformer`** | **Reduce dimensions (no leakage!)** | **Fit on train fold only** |
 
-### Pitfall Mitigation Modules (NEW!)
+### Pitfall Mitigation Modules
 
 | # | Module | Mitigates | What It Does |
 |---|--------|-----------|--------------|
@@ -80,7 +81,9 @@ This framework provides **ONLY individual modules** - no all-in-one pipelines, n
 
 **Each module is independent. Use any, all, or none. Mix with your own code.**
 
-### 🎯 Three Splitting Strategies Available!
+---
+
+## 🎯 Three Splitting Strategies Available!
 
 The `AdvancedSplitter` module supports **three different splitting strategies** - choose the best one for your data:
 
@@ -107,16 +110,33 @@ splitter = ClusterSplitter(smiles_col='SMILES', n_clusters=5)
 train_idx, val_idx, test_idx = splitter.split(df, test_size=0.2)
 ```
 
-**📖 See [`examples/splitting_strategies_examples.py`](examples/splitting_strategies_examples.py) for complete examples!**
-
 ---
 
 ## 🚀 Quick Start
 
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/bhatnira/Roy-QSAR-Generative-dev.git
+cd Roy-QSAR-Generative-dev
+
+# Install core dependencies
+pip install -r requirements.txt
+
+# Optional: Install ML libraries you want to use
+pip install scikit-learn  # For sklearn models
+pip install xgboost       # For XGBoost models
+pip install lightgbm      # For LightGBM models
+pip install torch         # For PyTorch models
+pip install tensorflow    # For TensorFlow/Keras models
+```
+
 ### Minimal Example (3 Modules)
+
 ```python
 from qsar_validation.duplicate_removal import DuplicateRemoval
-from qsar_validation.splitting_strategies import ScaffoldSplitter  # or TemporalSplitter, ClusterSplitter
+from qsar_validation.splitting_strategies import ScaffoldSplitter
 from qsar_validation.performance_metrics import PerformanceMetrics
 import pandas as pd
 
@@ -127,7 +147,7 @@ df = pd.read_csv('my_data.csv')
 remover = DuplicateRemoval(smiles_col='SMILES')
 df = remover.remove_duplicates(df, strategy='average')
 
-# Module 2: Split by scaffolds (RECOMMENDED - prevents data leakage!)
+# Module 2: Split by scaffolds (prevents data leakage!)
 splitter = ScaffoldSplitter(smiles_col='SMILES')
 train_idx, val_idx, test_idx = splitter.split(df, test_size=0.2)
 
@@ -140,7 +160,47 @@ results = metrics.calculate_all_metrics(y_true, y_pred, set_name='Test')
 print(results)
 ```
 
-### Feature Engineering Example (Proper CV)
+### Multi-Library Example
+
+```python
+from qsar_validation.model_complexity_control import ModelComplexityController
+
+# Create controller
+controller = ModelComplexityController(
+    n_samples=X_train.shape[0],
+    n_features=X_train.shape[1]
+)
+
+# Get recommendations for ALL libraries
+recommendations = controller.recommend_models()
+print(f"Recommended sklearn models: {recommendations['sklearn']}")
+print(f"Recommended XGBoost models: {recommendations['xgboost']}")
+print(f"Recommended LightGBM models: {recommendations['lightgbm']}")
+
+# Example 1: Use with sklearn
+from sklearn.linear_model import Ridge
+model = Ridge()
+param_grid = controller.get_safe_param_grid('ridge', library='sklearn')
+results = controller.nested_cv(X_train, y_train, model=model, 
+                               param_grid=param_grid, library='sklearn')
+
+# Example 2: Use with XGBoost
+import xgboost as xgb
+model = xgb.XGBRegressor()
+param_grid = controller.get_safe_param_grid('xgboost', library='xgboost')
+results = controller.nested_cv(X_train, y_train, model=model,
+                               param_grid=param_grid, library='xgboost')
+
+# Example 3: Use with LightGBM
+import lightgbm as lgb
+model = lgb.LGBMRegressor()
+param_grid = controller.get_safe_param_grid('lightgbm', library='lightgbm')
+results = controller.nested_cv(X_train, y_train, model=model,
+                               param_grid=param_grid, library='lightgbm')
+```
+
+### Feature Engineering Example (Proper CV - No Leakage!)
+
 ```python
 from qsar_validation.feature_scaling import FeatureScaler
 from qsar_validation.feature_selection import FeatureSelector
@@ -148,7 +208,6 @@ from qsar_validation.pca_module import PCATransformer
 from sklearn.model_selection import KFold
 
 # CRITICAL: All feature engineering happens WITHIN each CV fold!
-
 for train_idx, val_idx in KFold(n_splits=5).split(X_train):
     X_train_fold = X_train[train_idx]
     X_val_fold = X_train[val_idx]
@@ -166,7 +225,7 @@ for train_idx, val_idx in KFold(n_splits=5).split(X_train):
     X_val_selected = selector.transform(X_val_scaled)
     
     # Fit PCA on train fold only
-    pca = PCATransformer(n_components=0.95)  # Keep 95% variance
+    pca = PCATransformer(n_components=0.95)
     pca.fit(X_train_selected)
     X_train_pca = pca.transform(X_train_selected)
     X_val_pca = pca.transform(X_val_selected)
@@ -178,9 +237,8 @@ for train_idx, val_idx in KFold(n_splits=5).split(X_train):
 
 **⚠️ CRITICAL:** Feature scaling, selection, and PCA must be fitted **WITHIN** each CV fold to prevent data leakage!
 
-**📖 See [`examples/feature_engineering_examples.py`](examples/feature_engineering_examples.py) for 5 complete examples!**
-
 ### QSAR Pitfalls Mitigation Example
+
 ```python
 from qsar_validation.dataset_quality_analysis import DatasetQualityAnalyzer
 from qsar_validation.model_complexity_control import ModelComplexityController
@@ -210,139 +268,123 @@ random_test = validator.y_randomization_test(X_train, y_train, model)
 baseline_comparison = validator.compare_to_baseline(y_test, y_pred)
 ```
 
-**📖 See [`QSAR_PITFALLS_MITIGATION_GUIDE.md`](QSAR_PITFALLS_MITIGATION_GUIDE.md) for complete guide covering all 13 common pitfalls!**
-
-That's it! Independent modules, full control, no magic.
-
-**💡 Pro Tip:** Use `TemporalSplitter` if you have dates, or `ClusterSplitter` for small datasets!
-
 ---
 
-## 🎨 Usage Patterns
+## 🌟 Multi-Library Support Details
 
-### Pattern 1: Data Leakage Prevention Only
-Use just the essential modules to prevent data leakage:
+### Universal Model Interface
 
-```python
-from qsar_validation.duplicate_removal import DuplicateRemoval
-from qsar_validation.scaffold_splitting import ScaffoldSplitter
-from qsar_validation.feature_scaling import FeatureScaler
-
-# 1. Remove duplicates BEFORE splitting (prevents leakage)
-remover = DuplicateRemoval(smiles_col='SMILES')
-df = remover.remove_duplicates(df)
-
-# 2. Scaffold-based split (prevents leakage)
-splitter = ScaffoldSplitter(smiles_col='SMILES')
-train_idx, _, test_idx = splitter.split(df, test_size=0.2)
-
-# 3. Scale using train stats only (prevents leakage)
-scaler = FeatureScaler(method='standard')
-X_train_scaled = scaler.fit_transform(X_train)
-X_test_scaled = scaler.transform(X_test)
-
-# Now do YOUR modeling with confidence - no data leakage!
-```
-
-### Pattern 2: Complete Validation Workflow
-Use all 7 modules for comprehensive validation:
+The framework provides a **universal ModelWrapper** that works with ANY ML library:
 
 ```python
-from qsar_validation.duplicate_removal import DuplicateRemoval
-from qsar_validation.scaffold_splitting import ScaffoldSplitter
-from qsar_validation.feature_scaling import FeatureScaler
-from qsar_validation.cross_validation import CrossValidator
-from qsar_validation.performance_metrics import PerformanceMetrics
-from qsar_validation.dataset_bias_analysis import DatasetBiasAnalysis
-from qsar_validation.model_complexity_analysis import ModelComplexityAnalysis
+from qsar_validation.model_complexity_control import ModelWrapper
 
-# 1. Clean
-remover = DuplicateRemoval()
-df = remover.remove_duplicates(df)
+# Works with sklearn
+from sklearn.ensemble import RandomForestRegressor
+model = RandomForestRegressor()
+wrapped = ModelWrapper(model)
 
-# 2. Split
-splitter = ScaffoldSplitter()
-train_idx, val_idx, test_idx = splitter.split(df)
+# Works with XGBoost
+import xgboost as xgb
+model = xgb.XGBRegressor()
+wrapped = ModelWrapper(model)
 
-# 3. YOUR featurization code
-X_train, y_train = your_featurizer(df.iloc[train_idx])
-X_test, y_test = your_featurizer(df.iloc[test_idx])
+# Works with LightGBM
+import lightgbm as lgb
+model = lgb.LGBMRegressor()
+wrapped = ModelWrapper(model)
 
-# 4. Scale
-scaler = FeatureScaler()
-X_train = scaler.fit_transform(X_train)
-X_test = scaler.transform(X_test)
+# Works with PyTorch
+import torch.nn as nn
+model = MyPyTorchModel()
+wrapped = ModelWrapper(model)
 
-# 5. Cross-validate
-cv = CrossValidator(n_folds=5)
-cv_scores = cv.cross_validate(model, X_train, y_train)
+# Works with TensorFlow
+from tensorflow import keras
+model = keras.Sequential([...])
+wrapped = ModelWrapper(model)
 
-# 6. Train & predict (YOUR code)
-model.fit(X_train, y_train)
-y_pred = model.predict(X_test)
-
-# 7. Metrics
-metrics = PerformanceMetrics()
-results = metrics.calculate_all_metrics(y_test, y_pred)
-
-# 8. Bias analysis
-bias_analyzer = DatasetBiasAnalysis()
-bias_report = bias_analyzer.analyze_bias(X_train, X_test, y_train, y_test)
-
-# 9. Complexity analysis
-complexity_analyzer = ModelComplexityAnalysis()
-complexity_report = complexity_analyzer.analyze_complexity(model, X_train, y_train)
+# Unified interface for all
+wrapped.fit(X_train, y_train)
+predictions = wrapped.predict(X_test)
 ```
 
-### Pattern 3: Custom Workflow
-Mix our modules with your own code:
+### Library-Specific Recommendations
+
+The `ModelComplexityController` provides **library-specific recommendations** based on your dataset size:
 
 ```python
-from qsar_validation.duplicate_removal import DuplicateRemoval
-from qsar_validation.performance_metrics import PerformanceMetrics
+controller = ModelComplexityController(n_samples=100, n_features=500)
+recommendations = controller.recommend_models()
 
-# Use our duplicate removal
-remover = DuplicateRemoval()
-df = remover.remove_duplicates(df)
-
-# YOUR CUSTOM SPLITTING (not using our ScaffoldSplitter)
-train_df, test_df = my_custom_splitter(df)
-
-# YOUR CUSTOM FEATURIZATION
-X_train, y_train = my_custom_featurizer(train_df)
-X_test, y_test = my_custom_featurizer(test_df)
-
-# YOUR CUSTOM MODEL
-model = my_custom_model()
-model.fit(X_train, y_train)
-y_pred = model.predict(X_test)
-
-# Use our metrics
-metrics = PerformanceMetrics()
-results = metrics.calculate_all_metrics(y_test, y_pred)
+# For small datasets (100 samples, 500 features):
+# recommendations['sklearn'] = ['Ridge', 'Lasso', 'ElasticNet']
+# recommendations['xgboost'] = ['XGBRegressor (max_depth≤3)']
+# recommendations['lightgbm'] = ['LGBMRegressor (num_leaves≤15)']
+# recommendations['pytorch'] = ['Small MLP (1-2 hidden layers)']
+# recommendations['tensorflow'] = ['Keras Sequential (shallow)']
+# recommendations['avoid'] = ['Deep neural networks', 'RandomForest with >100 trees']
 ```
 
-### Pattern 4: Just One Module
-Need just one thing? Use just one module:
+### Library-Specific Safe Parameters
+
+Get **safe hyperparameter ranges** automatically adapted to your dataset size:
 
 ```python
-# Scenario: You just need to calculate metrics for existing predictions
+# Sklearn Ridge - simple regularization range
+param_grid = controller.get_safe_param_grid('ridge', library='sklearn')
+# Returns: {'alpha': [0.01, 0.1, 1.0, 10.0, 100.0]}
 
-from qsar_validation.performance_metrics import PerformanceMetrics
-import numpy as np
+# XGBoost - restricted depth for small datasets
+param_grid = controller.get_safe_param_grid('xgboost', library='xgboost')
+# Returns: {'max_depth': [2, 3], 'learning_rate': [0.1, 0.01], 'n_estimators': [50, 100]}
 
-# You already have predictions from your pipeline
-y_true = np.load('true_values.npy')
-y_pred = np.load('predictions.npy')
+# LightGBM - restricted leaves for small datasets
+param_grid = controller.get_safe_param_grid('lightgbm', library='lightgbm')
+# Returns: {'num_leaves': [7, 15], 'learning_rate': [0.1, 0.01], 'n_estimators': [50, 100]}
 
-# Just calculate metrics
-metrics = PerformanceMetrics()
-results = metrics.calculate_all_metrics(y_true, y_pred, set_name='Test')
-
-print(f"R²: {results['Test_R2']:.3f}")
-print(f"RMSE: {results['Test_RMSE']:.3f}")
-print(f"MAE: {results['Test_MAE']:.3f}")
+# PyTorch - small architectures for small datasets
+param_grid = controller.get_safe_param_grid('pytorch_mlp', library='pytorch')
+# Returns: {'hidden_sizes': [[32], [64]], 'learning_rate': [0.01, 0.001], 'dropout': [0.2, 0.3]}
 ```
+
+### Universal Nested Cross-Validation
+
+Run nested CV with **ANY model from ANY library**:
+
+```python
+# Works with sklearn
+from sklearn.linear_model import Ridge
+model = Ridge()
+param_grid = {'alpha': [0.01, 0.1, 1.0, 10.0]}
+results = controller.nested_cv(X, y, model=model, param_grid=param_grid, 
+                               library='sklearn', outer_cv=5, inner_cv=3)
+
+# Works with XGBoost
+import xgboost as xgb
+model = xgb.XGBRegressor()
+param_grid = {'max_depth': [3, 5], 'learning_rate': [0.1, 0.01]}
+results = controller.nested_cv(X, y, model=model, param_grid=param_grid,
+                               library='xgboost', outer_cv=5, inner_cv=3)
+
+# Works with custom models
+class MyCustomModel:
+    def fit(self, X, y): ...
+    def predict(self, X): ...
+
+model = MyCustomModel()
+param_grid = {'my_param': [1, 2, 3]}
+results = controller.nested_cv(X, y, model=model, param_grid=param_grid,
+                               library='custom', outer_cv=5, inner_cv=3)
+
+# All return the same format
+print(f"R²: {results['mean_r2']:.4f} ± {results['std_r2']:.4f}")
+print(f"RMSE: {results['mean_rmse']:.4f} ± {results['std_rmse']:.4f}")
+```
+
+### Complete Multi-Library Example
+
+See [`examples/multi_library_examples.py`](examples/multi_library_examples.py) for complete working examples with all libraries!
 
 ---
 
@@ -357,50 +399,21 @@ print(f"MAE: {results['Test_MAE']:.3f}")
 from qsar_validation.duplicate_removal import DuplicateRemoval
 
 remover = DuplicateRemoval(smiles_col='SMILES')
-
-# Strategy 1: Keep first occurrence
-df = remover.remove_duplicates(df, strategy='first')
-
-# Strategy 2: Average duplicate activities
 df = remover.remove_duplicates(df, strategy='average')
-
-# Check if duplicates exist
-has_dups = remover.check_duplicates(df)
 ```
 
-### 2️⃣ AdvancedSplitter (Three Strategies!)
+### 2️⃣ AdvancedSplitter
 **Prevents:** Similar molecules in train and test sets
 
 ```python
-from qsar_validation.splitting_strategies import (
-    ScaffoldSplitter,    # Strategy 1: Scaffold-based (RECOMMENDED)
-    TemporalSplitter,    # Strategy 2: Time-based
-    ClusterSplitter      # Strategy 3: Leave-cluster-out
-)
+from qsar_validation.splitting_strategies import ScaffoldSplitter
 
-# RECOMMENDED: Scaffold-based splitting
 splitter = ScaffoldSplitter(smiles_col='SMILES')
-train_idx, val_idx, test_idx = splitter.split(
-    df, 
-    test_size=0.2,
-    val_size=0.1,
-    random_state=42
-)
+train_idx, val_idx, test_idx = splitter.split(df, test_size=0.2)
 
 # Verify no scaffold overlap
 overlap = splitter.check_scaffold_overlap(train_idx, test_idx, df)
 print(f"Scaffold overlap: {overlap}")  # Should be 0
-
-# Get scaffold for a specific molecule
-scaffold = splitter.get_scaffold('c1ccccc1CC')
-
-# ALTERNATIVE: Time-based splitting (if you have dates)
-splitter = TemporalSplitter(smiles_col='SMILES', date_col='Date')
-train_idx, val_idx, test_idx = splitter.split(df, test_size=0.2)
-
-# ALTERNATIVE: Cluster-based splitting (for small datasets)
-splitter = ClusterSplitter(smiles_col='SMILES', n_clusters=5)
-train_idx, val_idx, test_idx = splitter.split(df, test_size=0.2)
 ```
 
 ### 3️⃣ FeatureScaler
@@ -412,15 +425,10 @@ from qsar_validation.feature_scaling import FeatureScaler
 
 # CORRECT: Within CV fold
 for train_idx, val_idx in cv_folds:
-    scaler = FeatureScaler(method='standard')  # or 'minmax', 'robust'
+    scaler = FeatureScaler(method='standard')
     scaler.fit(X_train[train_idx])  # ✓ Fit on train fold only
     X_train_scaled = scaler.transform(X_train[train_idx])
     X_val_scaled = scaler.transform(X_train[val_idx])
-    
-# WRONG: Fit on all training data before CV
-scaler.fit(X_train)  # ❌ LEAKAGE!
-X_scaled = scaler.transform(X_train)
-cv_score = cross_val_score(model, X_scaled, y)  # ❌ LEAKAGE!
 ```
 
 ### 4️⃣ FeatureSelector
@@ -433,14 +441,9 @@ from qsar_validation.feature_selection import FeatureSelector
 # CORRECT: Select features within CV fold
 for train_idx, val_idx in cv_folds:
     selector = FeatureSelector(method='univariate', n_features=50)
-    selector.fit(X_train[train_idx], y_train[train_idx])  # ✓ This fold only
+    selector.fit(X_train[train_idx], y_train[train_idx])
     X_train_selected = selector.transform(X_train[train_idx])
     X_val_selected = selector.transform(X_train[val_idx])
-    
-# WRONG: Select features before CV
-selector.fit(X_train, y_train)  # ❌ LEAKAGE!
-X_selected = selector.transform(X_train)
-cv_score = cross_val_score(model, X_selected, y)  # ❌ LEAKAGE!
 ```
 
 ### 5️⃣ PCATransformer
@@ -452,45 +455,10 @@ from qsar_validation.pca_module import PCATransformer
 
 # CORRECT: Fit PCA within CV fold
 for train_idx, val_idx in cv_folds:
-    pca = PCATransformer(n_components=0.95)  # Keep 95% variance
+    pca = PCATransformer(n_components=0.95)
     pca.fit(X_train[train_idx])  # ✓ Fit on train fold only
     X_train_pca = pca.transform(X_train[train_idx])
     X_val_pca = pca.transform(X_train[val_idx])
-    
-# WRONG: Fit PCA before CV
-pca.fit(X_train)  # ❌ LEAKAGE!
-X_pca = pca.transform(X_train)
-cv_score = cross_val_score(model, X_pca, y)  # ❌ LEAKAGE!
-```
-
-### 6️⃣ Complete Feature Engineering Pipeline (No Leakage!)
-
-```python
-from sklearn.model_selection import KFold
-
-# CORRECT: All steps within each CV fold
-for train_idx, val_idx in KFold(n_splits=5).split(X_train):
-    # 1. Scale
-    scaler = FeatureScaler(method='standard')
-    scaler.fit(X_train[train_idx])
-    X_train_scaled = scaler.transform(X_train[train_idx])
-    X_val_scaled = scaler.transform(X_train[val_idx])
-    
-    # 2. Select features
-    selector = FeatureSelector(method='univariate', n_features=50)
-    selector.fit(X_train_scaled, y_train[train_idx])
-    X_train_selected = selector.transform(X_train_scaled)
-    X_val_selected = selector.transform(X_val_scaled)
-    
-    # 3. Apply PCA
-    pca = PCATransformer(n_components=0.95)
-    pca.fit(X_train_selected)
-    X_train_pca = pca.transform(X_train_selected)
-    X_val_pca = pca.transform(X_val_selected)
-    
-    # 4. Train model
-    model.fit(X_train_pca, y_train[train_idx])
-    score = model.score(X_val_pca, y_train[val_idx])
 ```
 
 **⚠️ THE GOLDEN RULE:**
@@ -499,192 +467,27 @@ for train_idx, val_idx in KFold(n_splits=5).split(X_train):
 - **PCA:** Fit on train fold only
 - **Never fit ANY transformation on validation or test data!**
 
-# Or use fit_transform for train
-X_train_scaled = scaler.fit_transform(X_train)
-X_test_scaled = scaler.transform(X_test)
-```
-
 ---
 
-## 📊 Validation Modules
+## 📊 QSAR Pitfalls Covered
 
-### 4️⃣ CrossValidator
-Perform k-fold cross-validation properly:
+This framework helps mitigate **13 common QSAR pitfalls**:
 
-```python
-from qsar_validation.cross_validation import CrossValidator
-from sklearn.ensemble import RandomForestRegressor
-
-cv = CrossValidator(n_folds=5, random_state=42)
-
-model = RandomForestRegressor()
-cv_scores = cv.cross_validate(model, X_train, y_train, scoring='r2')
-
-print(f"CV R² scores: {cv_scores}")
-print(f"Mean: {np.mean(cv_scores):.3f} ± {np.std(cv_scores):.3f}")
-
-# Get fold indices for manual iteration
-for fold_idx, (train_idx, val_idx) in enumerate(cv.get_folds(X_train)):
-    print(f"Fold {fold_idx}: {len(train_idx)} train, {len(val_idx)} val")
-```
-
-### 5️⃣ PerformanceMetrics
-Calculate comprehensive performance metrics:
-
-```python
-from qsar_validation.performance_metrics import PerformanceMetrics
-
-metrics = PerformanceMetrics()
-
-# All metrics at once
-results = metrics.calculate_all_metrics(y_true, y_pred, set_name='Test')
-# Returns: {'Test_R2': ..., 'Test_RMSE': ..., 'Test_MAE': ..., 
-#           'Test_Pearson_r': ..., 'Test_Spearman_rho': ...}
-
-# Individual metrics
-r2 = metrics.calculate_r2(y_true, y_pred)
-rmse = metrics.calculate_rmse(y_true, y_pred)
-mae = metrics.calculate_mae(y_true, y_pred)
-pearson = metrics.calculate_pearson_r(y_true, y_pred)
-spearman = metrics.calculate_spearman_rho(y_true, y_pred)
-```
-
-### 6️⃣ DatasetBiasAnalysis
-Detect dataset bias issues:
-
-```python
-from qsar_validation.dataset_bias_analysis import DatasetBiasAnalysis
-
-analyzer = DatasetBiasAnalysis()
-
-# Comprehensive bias analysis
-report = analyzer.analyze_bias(
-    X_train=X_train,
-    X_test=X_test,
-    y_train=y_train,
-    y_test=y_test
-)
-
-# Check specific aspects
-coverage = analyzer.check_activity_coverage(y_train, y_test)
-print(f"Test activity coverage: {coverage:.1%}")
-
-# Interpret warnings
-if report['warnings']:
-    print("⚠️ Dataset bias detected:")
-    for warning in report['warnings']:
-        print(f"  - {warning}")
-```
-
-### 7️⃣ ModelComplexityAnalysis
-Analyze model complexity and overfitting risk:
-
-```python
-from qsar_validation.model_complexity_analysis import ModelComplexityAnalysis
-
-analyzer = ModelComplexityAnalysis()
-
-# Analyze model complexity
-report = analyzer.analyze_complexity(
-    model=model,
-    X=X_train,
-    y=y_train
-)
-
-print(f"Samples: {report['n_samples']}")
-print(f"Features: {report['n_features']}")
-print(f"Sample/Feature ratio: {report['sample_to_feature_ratio']:.2f}")
-
-if report['warnings']:
-    print("⚠️ Complexity warnings:")
-    for warning in report['warnings']:
-        print(f"  - {warning}")
-```
-
----
-
-## 📚 Documentation
-
-### Module-Specific Guides
-- **Quick Reference**: [`MODULAR_QUICK_REFERENCE.md`](MODULAR_QUICK_REFERENCE.md) - One-page reference for all modules
-- **Complete Guide**: [`MODULAR_USAGE_GUIDE.md`](MODULAR_USAGE_GUIDE.md) - Comprehensive usage guide
-- **Philosophy**: [`MODULAR_FRAMEWORK_PHILOSOPHY.md`](MODULAR_FRAMEWORK_PHILOSOPHY.md) - Framework design principles
-- **Examples**: [`examples/modular_examples.py`](examples/modular_examples.py) - 10 working examples
-
-### Technical Documentation
-- **Data Leakage Guide**: [`DATA_LEAKAGE_PREVENTION.md`](DATA_LEAKAGE_PREVENTION.md) - Complete leakage prevention guide
-- **Demonstration Report**: [`COMPREHENSIVE_DEMONSTRATION_REPORT.md`](COMPREHENSIVE_DEMONSTRATION_REPORT.md) - Framework validation
-- **Demo Summary**: [`DEMO_SUMMARY.md`](DEMO_SUMMARY.md) - Quick summary of demo results
-
----
-
-## 🔧 Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/bhatnira/Roy-QSAR-Generative-dev.git
-cd Roy-QSAR-Generative-dev
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Install the package
-pip install -e .
-```
-
-Or install directly from GitHub:
-```bash
-pip install git+https://github.com/bhatnira/Roy-QSAR-Generative-dev.git
-```
-
-### Requirements
-- Python ≥ 3.8
-- pandas
-- numpy
-- scikit-learn
-- rdkit
-- scipy
-
----
-
-## 🎯 When to Use Each Module
-
-| Your Need | Recommended Modules | Why |
-|-----------|--------------------|----|
-| Prevent data leakage | `DuplicateRemoval`, `ScaffoldSplitter`, `FeatureScaler` | Essential 3 for leakage prevention |
-| Just calculate metrics | `PerformanceMetrics` | Quick evaluation of predictions |
-| Just clean data | `DuplicateRemoval` | Remove duplicates before anything else |
-| Just split data | `ScaffoldSplitter` | Realistic train/test splits |
-| Evaluate model | `CrossValidator`, `PerformanceMetrics` | Comprehensive evaluation |
-| Check data quality | `DatasetBiasAnalysis` | Detect bias issues |
-| Check overfitting risk | `ModelComplexityAnalysis` | Analyze model/data complexity |
-| Custom workflow | Any combination | Mix and match as needed |
-
----
-
-## ⚙️ Module Parameters
-
-### Quick Parameter Reference
-
-**DuplicateRemoval:**
-- `smiles_col`: Column name for SMILES strings
-- `strategy`: 'first' | 'average' (how to handle duplicates)
-
-**ScaffoldSplitter:**
-- `smiles_col`: Column name for SMILES strings
-- `test_size`: Fraction for test set (default 0.2)
-- `val_size`: Fraction for validation set (default 0.1)
-- `random_state`: Random seed for reproducibility
-
-**FeatureScaler:**
-- `method`: 'standard' | 'minmax' | 'robust'
-
-**CrossValidator:**
-- `n_folds`: Number of CV folds (default 5)
-- `random_state`: Random seed
-
-**PerformanceMetrics:**
-- `set_name`: Name prefix for metrics (e.g., 'Test')
+| Pitfall | Mitigation Module | How It Helps |
+|---------|------------------|--------------|
+| 1. Dataset bias | `DatasetQualityAnalyzer` | Analyzes scaffold diversity, chemical space |
+| 2. Data leakage | `AdvancedSplitter`, `FeatureScaler`, etc. | Proper splitting, no test data in training |
+| 3. Overfitting | `ModelComplexityController` | Recommends appropriate model complexity |
+| 4. Improper CV | `PerformanceValidator` | Proper nested CV, mean±std reporting |
+| 5. Wrong metrics | `PerformanceValidator` | Comprehensive metrics, not just R² |
+| 6. Activity cliffs | `ActivityCliffsDetector` | Identifies cliffs, warns about instability |
+| 7. Narrow applicability | `UncertaintyEstimator` | Defines applicability domain |
+| 8. No uncertainty | `UncertaintyEstimator` | Provides prediction confidence |
+| 9. Cherry-picking | `PerformanceValidator` | Y-randomization, baseline comparison |
+| 10. Small datasets | `ModelComplexityController` | Restricts model complexity for small N |
+| 11. High dimensional | `FeatureSelector`, `PCATransformer` | Feature selection, dimensionality reduction |
+| 12. Imbalanced data | `DatasetQualityAnalyzer` | Detects activity distribution issues |
+| 13. External validation | `AdvancedSplitter` | Proper train/test/external splitting |
 
 ---
 
@@ -693,44 +496,125 @@ pip install git+https://github.com/bhatnira/Roy-QSAR-Generative-dev.git
 ### ✅ DO:
 1. **Always remove duplicates BEFORE splitting**
 2. **Use scaffold splitting for realistic estimates**
-3. **Fit scaler on training data only**
-4. **Use cross-validation on training set only**
-5. **Check for data bias**
-6. **Analyze model complexity**
-7. **Verify zero scaffold overlap**
-8. **Mix modules with your own code freely**
+3. **Fit scalers/selectors on training data only**
+4. **Use nested CV for hyperparameter tuning**
+5. **Check dataset quality before modeling**
+6. **Use multiple ML libraries and compare**
+7. **Report mean ± std for CV metrics**
+8. **Include y-randomization tests**
+9. **Check for activity cliffs**
+10. **Estimate prediction uncertainty**
 
 ### ❌ DON'T:
 1. ~~Remove duplicates after splitting~~
 2. ~~Use random splitting for QSAR~~
-3. ~~Fit scaler on all data~~
-4. ~~Include test data in cross-validation~~
-5. ~~Ignore bias warnings~~
-6. ~~Skip complexity analysis~~
-7. ~~Assume modules are compatible with everything~~
+3. ~~Fit scaler/selector on all data before CV~~
+4. ~~Use GridSearchCV without nested CV~~
+5. ~~Skip dataset quality analysis~~
+6. ~~Stick to one ML library~~
+7. ~~Report only best CV score~~
+8. ~~Skip negative controls~~
+9. ~~Ignore activity cliffs~~
+10. ~~Give point predictions without uncertainty~~
 
 ---
 
-## 🎓 Learning Path
+## 📚 Examples
 
-1. **Start Simple**: Use just one module (e.g., `PerformanceMetrics`)
-2. **Add Leakage Prevention**: Add `DuplicateRemoval` and `ScaffoldSplitter`
-3. **Add Validation**: Include `CrossValidator`
-4. **Add Analysis**: Use `DatasetBiasAnalysis` and `ModelComplexityAnalysis`
-5. **Customize**: Mix with your own code
-6. **Advanced**: Build your own helper classes wrapping modules
+### Complete Examples
+- **Multi-library examples**: [`examples/multi_library_examples.py`](examples/multi_library_examples.py)
+- **Splitting strategies**: [`examples/splitting_strategies_examples.py`](examples/splitting_strategies_examples.py)
+- **Feature engineering**: [`examples/feature_engineering_examples.py`](examples/feature_engineering_examples.py)
+- **Pitfall mitigation**: [`examples/pitfall_mitigation_examples.py`](examples/pitfall_mitigation_examples.py)
+
+### Usage Patterns
+
+**Pattern 1: Minimal (Leakage Prevention Only)**
+```python
+from qsar_validation.duplicate_removal import DuplicateRemoval
+from qsar_validation.splitting_strategies import ScaffoldSplitter
+from qsar_validation.feature_scaling import FeatureScaler
+
+# 1. Remove duplicates
+remover = DuplicateRemoval(smiles_col='SMILES')
+df = remover.remove_duplicates(df)
+
+# 2. Scaffold split
+splitter = ScaffoldSplitter(smiles_col='SMILES')
+train_idx, _, test_idx = splitter.split(df)
+
+# 3. Scale properly
+scaler = FeatureScaler(method='standard')
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+```
+
+**Pattern 2: Complete Validation**
+```python
+# Use all modules for comprehensive validation
+from qsar_validation.dataset_quality_analysis import DatasetQualityAnalyzer
+from qsar_validation.model_complexity_control import ModelComplexityController
+from qsar_validation.performance_validation import PerformanceValidator
+from qsar_validation.activity_cliffs_detection import ActivityCliffsDetector
+from qsar_validation.uncertainty_estimation import UncertaintyEstimator
+
+# 1. Dataset quality
+analyzer = DatasetQualityAnalyzer(smiles_col='SMILES', activity_col='pIC50')
+quality = analyzer.analyze(df)
+
+# 2. Model complexity
+controller = ModelComplexityController(n_samples=len(X_train), n_features=X_train.shape[1])
+recommendations = controller.recommend_models()
+
+# 3. Proper validation
+validator = PerformanceValidator()
+cv_results = validator.cross_validate_properly(X_train, y_train, model)
+
+# 4. Activity cliffs
+cliff_detector = ActivityCliffsDetector(smiles_col='SMILES', activity_col='pIC50')
+cliffs = cliff_detector.detect_cliffs(df)
+
+# 5. Uncertainty estimation
+uncertainty = UncertaintyEstimator()
+pred_with_uncertainty = uncertainty.predict_with_uncertainty(model, X_test)
+```
 
 ---
 
-## 🤝 Contributing
+## 🔧 Requirements
 
-Contributions welcome! This modular design makes it easy to:
-- Add new modules
-- Improve existing modules
-- Add examples
-- Improve documentation
+### Core Requirements
+- Python ≥ 3.8
+- pandas
+- numpy
+- rdkit
+- scipy
 
-Each module is independent, so changes don't affect others.
+### ML Libraries (Optional - Install What You Need)
+- scikit-learn (for sklearn models)
+- xgboost (for XGBoost models)
+- lightgbm (for LightGBM models)
+- torch (for PyTorch models)
+- tensorflow (for TensorFlow/Keras models)
+
+```bash
+# Install core only
+pip install numpy pandas scipy rdkit
+
+# Install with sklearn
+pip install numpy pandas scipy rdkit scikit-learn
+
+# Install with all ML libraries
+pip install numpy pandas scipy rdkit scikit-learn xgboost lightgbm torch tensorflow
+```
+
+---
+
+## 📞 Support & Contributing
+
+- **Questions**: Open an issue on [GitHub](https://github.com/bhatnira/Roy-QSAR-Generative-dev/issues)
+- **Examples**: See [`examples/`](examples/) folder
+- **Contributing**: Contributions welcome! Each module is independent, making it easy to add new features.
 
 ---
 
@@ -740,33 +624,32 @@ Each module is independent, so changes don't affect others.
 
 ---
 
-## 🔗 Links
-
-- **GitHub**: https://github.com/bhatnira/Roy-QSAR-Generative-dev
-- **Issues**: https://github.com/bhatnira/Roy-QSAR-Generative-dev/issues
-- **Documentation**: See `/docs` folder
-
----
-
 ## 🌟 Framework Principles
 
 > **"No magic. No automation. Just reliable tools."**
 > 
 > **"You build the pipeline. We provide the pipes."**
 > 
-> **"Your workflow, your rules, our modules."**
+> **"Your workflow, your rules, your ML library, our modules."**
 
-We believe in **modularity** over monoliths, **flexibility** over convenience, and **transparency** over magic.
+We believe in:
+- **Modularity** over monoliths
+- **Flexibility** over convenience
+- **Transparency** over magic
+- **Choice** over lock-in
 
 **You are the architect. We provide the building blocks.** 🚀
 
 ---
 
-## 📞 Support
+## 🎓 Version History
 
-- **Questions**: Open an issue on GitHub
-- **Examples**: See `examples/modular_examples.py`
-- **Documentation**: See `MODULAR_USAGE_GUIDE.md`
-- **Philosophy**: See `MODULAR_FRAMEWORK_PHILOSOPHY.md`
+- **v4.1.0** (Current): Multi-library support (sklearn, XGBoost, LightGBM, PyTorch, TensorFlow)
+- **v4.0.0**: QSAR pitfalls mitigation modules
+- **v3.0.0**: Feature engineering with leakage prevention
+- **v2.0.0**: Three splitting strategies (scaffold, temporal, cluster)
+- **v1.0.0**: Initial purely modular framework
 
-**Remember: Each module is independent. Use what you need, ignore the rest!**
+---
+
+**Remember: Each module is independent. Use what you need, ignore the rest! 🎯**
