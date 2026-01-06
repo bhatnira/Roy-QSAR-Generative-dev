@@ -6,6 +6,11 @@ A professional, modular, **notebook-free** framework for developing and validati
 
 ## Key Features
 
+- **Data Leakage Prevention**: Comprehensive protection against all leakage types
+  - Scaffold-based splitting (Bemis-Murcko)
+  - Automatic duplicate removal
+  - Proper feature scaling (train stats only)
+  - No information leakage from test sets
 - **Notebook-Independent**: Use as a Python package in any workflow
 - **Low-Data Optimized**: Designed for datasets with < 200 compounds
 - **Modular Architecture**: 7 focused validation modules
@@ -188,10 +193,11 @@ validation = validate_before_modeling(df)
 
 ## Documentation
 
-- **[USAGE_GUIDE.md](USAGE_GUIDE.md)** - **Complete notebook-free usage guide**
-- **[standalone_qsar_workflow.py](standalone_qsar_workflow.py)** - **Ready-to-use standalone script**
-- **[START_HERE.md](docs/START_HERE.md)** - Getting started overview
-- **[COMPREHENSIVE_VALIDATION_GUIDE.md](docs/COMPREHENSIVE_VALIDATION_GUIDE.md)** - Full validation guide
+- **[DATA_LEAKAGE_PREVENTION.md](DATA_LEAKAGE_PREVENTION.md)** - **How data leakage is prevented**
+- **[USAGE_GUIDE.md](USAGE_GUIDE.md)** - Complete notebook-free usage guide
+- **[standalone_qsar_workflow.py](standalone_qsar_workflow.py)** - Ready-to-use standalone script
+- **[QUICK_START.md](QUICK_START.md)** - Quick reference (30 seconds to 5 minutes)
+- **[docs/README_DATA_LEAKAGE_FIX.md](docs/README_DATA_LEAKAGE_FIX.md)** - Detailed leakage fixes
 - **[PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md)** - Detailed structure guide
 - **[examples/](examples/)** - Example scripts for different use cases
 
