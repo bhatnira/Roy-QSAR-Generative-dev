@@ -13,15 +13,120 @@ Provides tools to:
 - Implement nested CV
 - Provide uncertainty estimates
 
+Supports:
+- Scikit-learn models
+- XGBoost / LightGBM
+- PyTorch / TensorFlow
+- Custom models
+
 Author: QSAR Validation Framework
 """
 
 import numpy as np
-from typing import Dict, List, Optional, Tuple, Any
-from sklearn.model_selection import KFold, GridSearchCV
-from sklearn.linear_model import Ridge
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import r2_score, mean_squared_error
+from typing import Dict, List, Optional, Tuple, Any, Callable
+
+
+class ModelWrapper:
+    """
+    Universal model wrapper for different ML libraries.
+    
+    Supports:
+    - Scikit-learn
+    - XGBoost
+    - LightGBM
+    - PyTorch
+    - TensorFlow
+    - Custom models
+    """
+    
+    def __init__(self, model, library: str = 'sklearn'):
+        self.model = model
+        self.library = library.lower()
+        self._detect_library()
+    
+    def _detect_library(self):
+        """Auto-detect ML library if not specified."""
+        if self.library == 'auto':
+            model_class = str(type(self.model))
+            if 'sklearn' in model_class:
+                self.library = 'sklearn'
+            elif 'xgboost' in model_class or 'XGB' in model_class:
+                self.library = 'xgboost'
+            elif 'lightgbm' in model_class or 'LGB' in model_class:
+                self.library = 'lightgbm'
+            elif 'torch' in model_class:
+                self.library = 'pytorch'
+            elif 'tensorflow' in model_class or 'keras' in model_class:
+                self.library = 'tensorflow'
+            else:
+                self.library = 'custom'
+    
+    def fit(self, X, y):
+        """Fit model."""
+        if self.library in ['sklearn', 'xgboost', 'lightgbm']:
+            self.model.fit(X, y)
+        elif self.library == 'pytorch':
+            # PyTorch models need custom training loop
+            # User should provide fit method
+            if hasattr(self.model, 'fit'):
+                self.model.fit(X, y)
+            else:
+                raise ValueError("PyTorch model needs .fit() method")
+        elif self.library == 'tensorflow':
+            # TensorFlow/Keras models
+            self.model.fit(X, y, verbose=0)
+        elif self.library == 'custom':
+            if hasattr(self.model, 'fit'):
+                self.model.fit(X, y)
+            else:
+                raise ValueError("Custom model needs .fit() method")
+        return self
+    
+    def predict(self, X):
+        """Predict."""
+        if self.library in ['sklearn', 'xgboost', 'lightgbm', 'tensorflow']:
+            return self.model.predict(X)
+        elif self.library == 'pytorch':
+            import torch
+            if isinstance(X, np.ndarray):
+                X = torch.FloatTensor(X)
+            self.model.eval()
+            with torch.no_grad():
+                return self.model(X).numpy()
+        elif self.library == 'custom':
+            return self.model.predict(X)
+    
+    def clone(self, **params):
+        """Clone model with new parameters."""
+        if self.library == 'sklearn':
+            from sklearn.base import clone
+            return ModelWrapper(clone(self.model), self.library)
+        elif self.library in ['xgboost', 'lightgbm']:
+            # XGBoost/LightGBM can be recreated
+            model_class = type(self.model)
+            new_params = self.model.get_params()
+            new_params.update(params)
+            return ModelWrapper(model_class(**new_params), self.library)
+        else:
+            # For PyTorch/TensorFlow, return same model
+            # User should handle model recreation
+            return self
+
+
+def calculate_metrics(y_true: np.ndarray, y_pred: np.ndarray) -> Dict:
+    """Calculate metrics without sklearn dependency."""
+    # R²
+    ss_res = np.sum((y_true - y_pred) ** 2)
+    ss_tot = np.sum((y_true - np.mean(y_true)) ** 2)
+    r2 = 1 - (ss_res / ss_tot) if ss_tot > 0 else 0
+    
+    # RMSE
+    rmse = np.sqrt(np.mean((y_true - y_pred) ** 2))
+    
+    # MAE
+    mae = np.mean(np.abs(y_true - y_pred))
+    
+    return {'r2': r2, 'rmse': rmse, 'mae': mae}
 
 
 class ModelComplexityController:
@@ -96,17 +201,23 @@ class ModelComplexityController:
         """
         Recommend appropriate model types based on dataset size.
         
+        Now includes recommendations for ALL ML libraries!
+        
         Returns
         -------
         recommendations : dict
             Model recommendations with reasoning
         """
         print("\n" + "-"*80)
-        print("MODEL RECOMMENDATIONS")
+        print("MODEL RECOMMENDATIONS (All Libraries)")
         print("-"*80)
         
         recommendations = {
-            'primary': [],
+            'sklearn': [],
+            'xgboost': [],
+            'lightgbm': [],
+            'pytorch': [],
+            'tensorflow': [],
             'avoid': [],
             'reasoning': []
         }
@@ -114,157 +225,397 @@ class ModelComplexityController:
         ratio = self.complexity_ratio
         
         if ratio < 0.1:
-            # Very low data regime
-            recommendations['primary'] = ['Ridge', 'Lasso', 'ElasticNet']
-            recommendations['avoid'] = ['Random Forest', 'XGBoost', 'Neural Networks', 'SVM']
+            # Very low data regime (N < 100 for typical features)
+            recommendations['sklearn'] = ['Ridge', 'Lasso', 'ElasticNet', 'KernelRidge (RBF)']
+            recommendations['xgboost'] = []
+            recommendations['lightgbm'] = []
+            recommendations['pytorch'] = []
+            recommendations['tensorflow'] = []
+            recommendations['avoid'] = ['All tree-based', 'All neural networks']
             recommendations['reasoning'].append(
-                f"Sample/feature ratio = {ratio:.3f} < 0.1: Only linear models recommended"
+                f"Sample/feature ratio = {ratio:.3f} < 0.1: Only LINEAR models recommended"
             )
-            print("\n  ⚠️  VERY LOW DATA REGIME")
-            print("  ✓ Recommended: Ridge, Lasso, ElasticNet")
-            print("  ✗ Avoid: Random Forest, XGBoost, Neural Networks")
+            print("\n  ⚠️  VERY LOW DATA REGIME (N < 100)")
+            print("  ✓ Scikit-learn: Ridge, Lasso, ElasticNet")
+            print("  ✗ Avoid: XGBoost, LightGBM, PyTorch, TensorFlow")
             
         elif ratio < 0.5:
-            # Low data regime
-            recommendations['primary'] = ['Ridge', 'Random Forest (shallow)']
-            recommendations['avoid'] = ['Deep Random Forest', 'XGBoost', 'Neural Networks']
+            # Low data regime (100 < N < 500 for typical features)
+            recommendations['sklearn'] = ['Ridge', 'RandomForest (shallow)', 'GradientBoosting (conservative)']
+            recommendations['xgboost'] = ['XGBRegressor (max_depth≤3, n_estimators≤100)']
+            recommendations['lightgbm'] = ['LGBMRegressor (num_leaves≤15, n_estimators≤100)']
+            recommendations['pytorch'] = []
+            recommendations['tensorflow'] = []
+            recommendations['avoid'] = ['Deep neural networks', 'Complex architectures']
             recommendations['reasoning'].append(
-                f"Sample/feature ratio = {ratio:.3f} < 0.5: Simple models recommended"
+                f"Sample/feature ratio = {ratio:.3f} < 0.5: Simple models + shallow boosting"
             )
-            print("\n  ⚠️  LOW DATA REGIME")
-            print("  ✓ Recommended: Ridge, Random Forest (max_depth ≤ 5)")
-            print("  ✗ Avoid: Deep trees, XGBoost, Neural Networks")
+            print("\n  ⚠️  LOW DATA REGIME (100 < N < 500)")
+            print("  ✓ Scikit-learn: Ridge, RandomForest (max_depth≤5)")
+            print("  ⚙️  XGBoost/LightGBM: Shallow trees ONLY (max_depth≤3)")
+            print("  ✗ Avoid: Deep neural networks")
             
         elif ratio < 2.0:
-            # Moderate data regime
-            recommendations['primary'] = ['Ridge', 'Random Forest', 'Gradient Boosting (conservative)']
-            recommendations['avoid'] = ['Deep Neural Networks']
+            # Moderate data regime (500 < N < 2000)
+            recommendations['sklearn'] = ['Ridge', 'RandomForest', 'GradientBoosting', 'SVR']
+            recommendations['xgboost'] = ['XGBRegressor (standard settings)']
+            recommendations['lightgbm'] = ['LGBMRegressor (standard settings)']
+            recommendations['pytorch'] = ['Small MLP (1-2 hidden layers, <100 units)']
+            recommendations['tensorflow'] = ['Keras Sequential (1-2 hidden layers)']
+            recommendations['avoid'] = ['Very deep networks (>5 layers)']
             recommendations['reasoning'].append(
                 f"Sample/feature ratio = {ratio:.3f} < 2.0: Moderate complexity OK"
             )
-            print("\n  ⚙️  MODERATE DATA REGIME")
-            print("  ✓ Recommended: Ridge, Random Forest, Gradient Boosting (conservative)")
-            print("  ⚠️  Caution: Deep Neural Networks (requires careful regularization)")
+            print("\n  ⚙️  MODERATE DATA REGIME (500 < N < 2000)")
+            print("  ✓ Scikit-learn: All models")
+            print("  ✓ XGBoost/LightGBM: Standard settings")
+            print("  ⚙️  PyTorch/TensorFlow: Small networks (1-2 layers)")
+            print("  ⚠️  Caution: Very deep networks")
             
         else:
-            # Good data regime
-            recommendations['primary'] = ['All models']
+            # Good data regime (N > 2000)
+            recommendations['sklearn'] = ['All models']
+            recommendations['xgboost'] = ['All settings']
+            recommendations['lightgbm'] = ['All settings']
+            recommendations['pytorch'] = ['MLP, CNN, Attention (moderate depth)']
+            recommendations['tensorflow'] = ['All Keras models']
             recommendations['avoid'] = []
             recommendations['reasoning'].append(
                 f"Sample/feature ratio = {ratio:.3f} ≥ 2.0: Can use complex models"
             )
-            print("\n  ✓  GOOD DATA REGIME")
-            print("  ✓ Can use: All model types")
+            print("\n  ✓  GOOD DATA REGIME (N > 2000)")
+            print("  ✓ Can use: All model types and libraries")
+            print("  ✓ XGBoost/LightGBM: Full hyperparameter ranges")
+            print("  ✓ PyTorch/TensorFlow: Moderate depth networks")
         
-        print("\n  📌 Remember: In low-data QSAR, simpler is often better!")
+        print("\n  📌 Library-specific recommendations:")
+        print(f"     • Scikit-learn: {', '.join(recommendations['sklearn']) if recommendations['sklearn'] else 'Not recommended'}")
+        print(f"     • XGBoost: {', '.join(recommendations['xgboost']) if recommendations['xgboost'] else 'Not recommended'}")
+        print(f"     • LightGBM: {', '.join(recommendations['lightgbm']) if recommendations['lightgbm'] else 'Not recommended'}")
+        print(f"     • PyTorch: {', '.join(recommendations['pytorch']) if recommendations['pytorch'] else 'Not recommended'}")
+        print(f"     • TensorFlow: {', '.join(recommendations['tensorflow']) if recommendations['tensorflow'] else 'Not recommended'}")
         
         return recommendations
     
-    def get_safe_param_grid(self, model_type: str) -> Dict:
+    def get_safe_param_grid(self, model_type: str, library: str = 'sklearn') -> Dict:
         """
         Get safe hyperparameter ranges based on dataset size.
+        
+        Supports all major ML libraries!
         
         Parameters
         ----------
         model_type : str
-            Model type: 'ridge', 'random_forest', 'gradient_boosting'
+            Model type: 'ridge', 'random_forest', 'xgboost', 'lightgbm', 'pytorch_mlp'
+        
+        library : str
+            Library: 'sklearn', 'xgboost', 'lightgbm', 'pytorch', 'tensorflow'
         
         Returns
         -------
         param_grid : dict
-            Safe hyperparameter grid for GridSearchCV
+            Safe hyperparameter grid
         """
         print(f"\n" + "-"*80)
-        print(f"SAFE HYPERPARAMETER RANGES: {model_type.upper()}")
+        print(f"SAFE HYPERPARAMETER RANGES: {model_type.upper()} ({library.upper()})")
         print("-"*80)
         
         ratio = self.complexity_ratio
         
-        if model_type.lower() == 'ridge':
-            param_grid = {
-                'alpha': [0.01, 0.1, 1.0, 10.0, 100.0]
-            }
-            print("  Ridge regularization:")
-            print("    alpha: [0.01, 0.1, 1.0, 10.0, 100.0]")
+        # Scikit-learn models
+        if library == 'sklearn' and model_type.lower() == 'ridge':
+            param_grid = {'alpha': [0.01, 0.1, 1.0, 10.0, 100.0]}
+            print(f"Alpha range: {param_grid['alpha']}")
+            return param_grid
             
-        elif model_type.lower() == 'random_forest':
-            if ratio < 0.5:
-                # Low data: shallow trees only
+        elif library == 'sklearn' and model_type.lower() == 'random_forest':
+            # Adjust complexity based on ratio
+            if ratio < 1.0:  # Small dataset
                 param_grid = {
                     'n_estimators': [50, 100],
                     'max_depth': [3, 5],
                     'min_samples_split': [10, 20],
                     'min_samples_leaf': [5, 10]
                 }
-                print("  ⚠️  Low data regime - SHALLOW trees:")
-            elif ratio < 2.0:
-                # Moderate data: moderate depth
+            elif ratio < 2.0:  # Medium dataset
                 param_grid = {
-                    'n_estimators': [50, 100, 200],
-                    'max_depth': [5, 10, 15],
+                    'n_estimators': [100, 200],
+                    'max_depth': [5, 10],
                     'min_samples_split': [5, 10],
                     'min_samples_leaf': [2, 5]
                 }
-                print("  ⚙️  Moderate data regime - MODERATE trees:")
-            else:
-                # Good data: can go deeper
+            else:  # Large dataset
                 param_grid = {
-                    'n_estimators': [100, 200, 500],
-                    'max_depth': [10, 20, 30],
-                    'min_samples_split': [2, 5, 10],
-                    'min_samples_leaf': [1, 2, 5]
+                    'n_estimators': [100, 200, 300],
+                    'max_depth': [10, 20, None],
+                    'min_samples_split': [2, 5],
+                    'min_samples_leaf': [1, 2]
                 }
-                print("  ✓  Good data regime - Can use deeper trees:")
             
-            for param, values in param_grid.items():
-                print(f"    {param}: {values}")
+            print(f"n_estimators: {param_grid['n_estimators']}")
+            print(f"max_depth: {param_grid['max_depth']}")
+            print(f"min_samples_split: {param_grid['min_samples_split']}")
+            print(f"min_samples_leaf: {param_grid['min_samples_leaf']}")
+            return param_grid
         
-        elif model_type.lower() == 'gradient_boosting':
-            if ratio < 0.5:
-                print("  ⚠️  NOT RECOMMENDED for this dataset size!")
-                print("  Use Ridge or shallow Random Forest instead")
-                return {}
-            elif ratio < 2.0:
+        # XGBoost models
+        elif library == 'xgboost' and model_type.lower() in ['xgboost', 'xgbregressor']:
+            if ratio < 1.0:  # Small dataset
                 param_grid = {
+                    'max_depth': [2, 3],
+                    'learning_rate': [0.1, 0.01],
                     'n_estimators': [50, 100],
-                    'max_depth': [3, 5],
-                    'learning_rate': [0.01, 0.1],
-                    'subsample': [0.8]
+                    'subsample': [0.8],
+                    'colsample_bytree': [0.8]
                 }
-                print("  ⚙️  Conservative settings:")
-            else:
+            elif ratio < 2.0:  # Medium dataset
                 param_grid = {
-                    'n_estimators': [100, 200, 500],
                     'max_depth': [3, 5, 7],
-                    'learning_rate': [0.01, 0.05, 0.1],
-                    'subsample': [0.8, 1.0]
+                    'learning_rate': [0.1, 0.05, 0.01],
+                    'n_estimators': [100, 200],
+                    'subsample': [0.7, 0.8, 0.9],
+                    'colsample_bytree': [0.7, 0.8, 0.9]
                 }
-                print("  ✓  Standard settings:")
+            else:  # Large dataset
+                param_grid = {
+                    'max_depth': [5, 7, 9],
+                    'learning_rate': [0.1, 0.05, 0.01],
+                    'n_estimators': [100, 200, 300],
+                    'subsample': [0.7, 0.8, 0.9],
+                    'colsample_bytree': [0.7, 0.8, 0.9]
+                }
             
-            for param, values in param_grid.items():
-                print(f"    {param}: {values}")
+            print(f"max_depth: {param_grid['max_depth']}")
+            print(f"learning_rate: {param_grid['learning_rate']}")
+            print(f"n_estimators: {param_grid['n_estimators']}")
+            return param_grid
+        
+        # LightGBM models
+        elif library == 'lightgbm' and model_type.lower() in ['lightgbm', 'lgbmregressor']:
+            if ratio < 1.0:  # Small dataset
+                param_grid = {
+                    'num_leaves': [7, 15],
+                    'learning_rate': [0.1, 0.01],
+                    'n_estimators': [50, 100],
+                    'min_child_samples': [10, 20]
+                }
+            elif ratio < 2.0:  # Medium dataset
+                param_grid = {
+                    'num_leaves': [15, 31, 63],
+                    'learning_rate': [0.1, 0.05, 0.01],
+                    'n_estimators': [100, 200],
+                    'min_child_samples': [5, 10, 20]
+                }
+            else:  # Large dataset
+                param_grid = {
+                    'num_leaves': [31, 63, 127],
+                    'learning_rate': [0.1, 0.05, 0.01],
+                    'n_estimators': [100, 200, 300],
+                    'min_child_samples': [5, 10, 20]
+                }
+            
+            print(f"num_leaves: {param_grid['num_leaves']}")
+            print(f"learning_rate: {param_grid['learning_rate']}")
+            print(f"n_estimators: {param_grid['n_estimators']}")
+            return param_grid
+        
+        # PyTorch models
+        elif library == 'pytorch' and model_type.lower() in ['pytorch_mlp', 'mlp']:
+            if ratio < 1.0:  # Small dataset
+                param_grid = {
+                    'hidden_sizes': [[32], [64]],
+                    'learning_rate': [0.01, 0.001],
+                    'dropout': [0.2, 0.3],
+                    'batch_size': [16, 32]
+                }
+            elif ratio < 2.0:  # Medium dataset
+                param_grid = {
+                    'hidden_sizes': [[64], [128], [64, 32]],
+                    'learning_rate': [0.01, 0.001, 0.0001],
+                    'dropout': [0.1, 0.2, 0.3],
+                    'batch_size': [32, 64]
+                }
+            else:  # Large dataset
+                param_grid = {
+                    'hidden_sizes': [[128], [256], [128, 64], [256, 128]],
+                    'learning_rate': [0.01, 0.001, 0.0001],
+                    'dropout': [0.1, 0.2, 0.3],
+                    'batch_size': [32, 64, 128]
+                }
+            
+            print(f"hidden_sizes: {param_grid['hidden_sizes']}")
+            print(f"learning_rate: {param_grid['learning_rate']}")
+            print(f"dropout: {param_grid['dropout']}")
+            return param_grid
+        
+        # TensorFlow models
+        elif library == 'tensorflow' and model_type.lower() in ['tensorflow', 'keras']:
+            if ratio < 1.0:  # Small dataset
+                param_grid = {
+                    'layers': [[32], [64]],
+                    'learning_rate': [0.01, 0.001],
+                    'dropout': [0.2, 0.3],
+                    'batch_size': [16, 32]
+                }
+            elif ratio < 2.0:  # Medium dataset
+                param_grid = {
+                    'layers': [[64], [128], [64, 32]],
+                    'learning_rate': [0.01, 0.001, 0.0001],
+                    'dropout': [0.1, 0.2, 0.3],
+                    'batch_size': [32, 64]
+                }
+            else:  # Large dataset
+                param_grid = {
+                    'layers': [[128], [256], [128, 64], [256, 128]],
+                    'learning_rate': [0.01, 0.001, 0.0001],
+                    'dropout': [0.1, 0.2, 0.3],
+                    'batch_size': [32, 64, 128]
+                }
+            
+            print(f"layers: {param_grid['layers']}")
+            print(f"learning_rate: {param_grid['learning_rate']}")
+            print(f"dropout: {param_grid['dropout']}")
+            return param_grid
         
         else:
-            raise ValueError(f"Unknown model type: {model_type}")
+            # Default: simple parameter grid
+            print("WARNING: Unknown model_type or library, returning empty grid")
+            return {}
+    
+    def simple_kfold_split(self, n_samples: int, n_splits: int = 5, 
+                          shuffle: bool = True, random_state: int = 42):
+        """
+        Simple K-Fold cross-validation split (sklearn-independent).
         
-        print("\n  📌 These ranges prevent excessive overfitting")
+        Parameters
+        ----------
+        n_samples : int
+            Number of samples
+        n_splits : int
+            Number of folds
+        shuffle : bool
+            Whether to shuffle before splitting
+        random_state : int
+            Random seed
         
-        return param_grid
+        Yields
+        ------
+        train_idx, test_idx : tuple of arrays
+            Training and test indices for each fold
+        """
+        indices = np.arange(n_samples)
+        
+        if shuffle:
+            np.random.seed(random_state)
+            np.random.shuffle(indices)
+        
+        fold_sizes = np.full(n_splits, n_samples // n_splits, dtype=int)
+        fold_sizes[:n_samples % n_splits] += 1
+        
+        current = 0
+        for fold_size in fold_sizes:
+            start, stop = current, current + fold_size
+            test_idx = indices[start:stop]
+            train_idx = np.concatenate([indices[:start], indices[stop:]])
+            yield train_idx, test_idx
+            current = stop
+    
+    def simple_grid_search(self, model, param_grid: Dict, X_train, y_train, 
+                          cv_splits: int = 3, random_state: int = 42):
+        """
+        Simple grid search (sklearn-independent).
+        
+        Parameters
+        ----------
+        model : object
+            Model to tune (wrapped with ModelWrapper)
+        param_grid : dict
+            Parameter grid
+        X_train : np.ndarray
+            Training features
+        y_train : np.ndarray
+            Training targets
+        cv_splits : int
+            Number of CV folds
+        random_state : int
+            Random seed
+        
+        Returns
+        -------
+        best_model : object
+            Best model found
+        best_params : dict
+            Best parameters
+        best_score : float
+            Best CV score (R²)
+        """
+        from itertools import product
+        
+        # Generate all parameter combinations
+        param_names = list(param_grid.keys())
+        param_values = list(param_grid.values())
+        param_combinations = list(product(*param_values))
+        
+        best_score = -np.inf
+        best_params = None
+        best_model = None
+        
+        for param_combo in param_combinations:
+            params = dict(zip(param_names, param_combo))
+            
+            # Create model with these params
+            # (Assuming model can be created with **params)
+            try:
+                wrapped_model = ModelWrapper(model.__class__(**params))
+            except:
+                # If model doesn't support direct param setting, skip
+                continue
+            
+            # Cross-validation
+            cv_scores = []
+            for train_idx, val_idx in self.simple_kfold_split(
+                len(X_train), n_splits=cv_splits, random_state=random_state
+            ):
+                X_tr = X_train[train_idx]
+                y_tr = y_train[train_idx]
+                X_val = X_train[val_idx]
+                y_val = y_train[val_idx]
+                
+                # Train
+                wrapped_model.fit(X_tr, y_tr)
+                
+                # Evaluate
+                y_pred = wrapped_model.predict(X_val)
+                metrics = calculate_metrics(y_val, y_pred)
+                cv_scores.append(metrics['r2'])
+            
+            mean_score = np.mean(cv_scores)
+            
+            if mean_score > best_score:
+                best_score = mean_score
+                best_params = params
+                best_model = wrapped_model
+        
+        return best_model, best_params, best_score
     
     def nested_cv(
         self,
         X: np.ndarray,
         y: np.ndarray,
-        model_type: str = 'ridge',
+        model,  # Accept model instance directly
+        param_grid: Dict,
+        library: str = 'sklearn',
         outer_cv: int = 5,
         inner_cv: int = 3,
         random_state: int = 42
     ) -> Dict:
         """
-        Perform nested cross-validation.
+        Perform nested cross-validation (library-agnostic).
         
         Outer loop: Performance estimation
         Inner loop: Hyperparameter tuning
+        
+        Works with ANY ML library!
         
         Parameters
         ----------
@@ -274,8 +625,14 @@ class ModelComplexityController:
         y : np.ndarray
             Target values
         
-        model_type : str
-            'ridge' or 'random_forest'
+        model : object
+            Base model to tune (can be sklearn, xgboost, lightgbm, pytorch, tensorflow)
+        
+        param_grid : dict
+            Parameter grid for tuning
+        
+        library : str
+            Library type: 'sklearn', 'xgboost', 'lightgbm', 'pytorch', 'tensorflow'
         
         outer_cv : int
             Number of outer CV folds
@@ -283,41 +640,38 @@ class ModelComplexityController:
         inner_cv : int
             Number of inner CV folds
         
+        random_state : int
+            Random seed
+        
         Returns
         -------
         results : dict
-            Nested CV results
+            Nested CV results including mean/std R², RMSE, best parameters
         """
         print("\n" + "="*80)
-        print(f"NESTED CROSS-VALIDATION: {model_type.upper()}")
+        print(f"NESTED CROSS-VALIDATION ({library.upper()})")
         print("="*80)
         print(f"\nOuter CV: {outer_cv} folds (performance estimation)")
         print(f"Inner CV: {inner_cv} folds (hyperparameter tuning)")
-        
-        # Get safe parameter grid
-        param_grid = self.get_safe_param_grid(model_type)
+        print(f"Model: {model.__class__.__name__}")
         
         if not param_grid:
-            raise ValueError(f"Model type '{model_type}' not recommended for this dataset")
+            raise ValueError("Empty parameter grid provided")
         
-        # Setup model
-        if model_type.lower() == 'ridge':
-            base_model = Ridge()
-        elif model_type.lower() == 'random_forest':
-            base_model = RandomForestRegressor(random_state=random_state, n_jobs=-1)
-        else:
-            raise ValueError(f"Unknown model type: {model_type}")
+        # Wrap model
+        wrapped_model = ModelWrapper(model)
         
         # Outer CV loop
-        outer_kf = KFold(n_splits=outer_cv, shuffle=True, random_state=random_state)
-        
         outer_scores = []
         outer_rmse = []
+        outer_mae = []
         best_params_per_fold = []
         
         print("\n" + "-"*80)
         
-        for fold_idx, (train_idx, test_idx) in enumerate(outer_kf.split(X)):
+        for fold_idx, (train_idx, test_idx) in enumerate(
+            self.simple_kfold_split(len(X), n_splits=outer_cv, random_state=random_state)
+        ):
             print(f"\nOuter Fold {fold_idx + 1}/{outer_cv}")
             
             X_train_outer = X[train_idx]
@@ -326,47 +680,40 @@ class ModelComplexityController:
             y_test_outer = y[test_idx]
             
             # Inner CV loop: hyperparameter tuning
-            inner_kf = KFold(n_splits=inner_cv, shuffle=True, random_state=random_state)
-            
-            grid_search = GridSearchCV(
-                base_model,
-                param_grid,
-                cv=inner_kf,
-                scoring='r2',
-                n_jobs=-1
+            best_model, best_params, best_cv_score = self.simple_grid_search(
+                model, param_grid, X_train_outer, y_train_outer,
+                cv_splits=inner_cv, random_state=random_state
             )
             
-            grid_search.fit(X_train_outer, y_train_outer)
-            
-            # Best model from inner CV
-            best_model = grid_search.best_estimator_
-            best_params = grid_search.best_params_
             best_params_per_fold.append(best_params)
-            
             print(f"  Best params: {best_params}")
+            print(f"  Best CV R²: {best_cv_score:.4f}")
             
             # Evaluate on outer test fold
             y_pred = best_model.predict(X_test_outer)
-            score = r2_score(y_test_outer, y_pred)
-            rmse = np.sqrt(mean_squared_error(y_test_outer, y_pred))
+            metrics = calculate_metrics(y_test_outer, y_pred)
             
-            outer_scores.append(score)
-            outer_rmse.append(rmse)
+            outer_scores.append(metrics['r2'])
+            outer_rmse.append(metrics['rmse'])
+            outer_mae.append(metrics['mae'])
             
-            print(f"  R²: {score:.4f}")
-            print(f"  RMSE: {rmse:.4f}")
+            print(f"  Test R²: {metrics['r2']:.4f}")
+            print(f"  Test RMSE: {metrics['rmse']:.4f}")
         
         # Summary
         mean_r2 = np.mean(outer_scores)
         std_r2 = np.std(outer_scores)
         mean_rmse = np.mean(outer_rmse)
         std_rmse = np.std(outer_rmse)
+        mean_mae = np.mean(outer_mae)
+        std_mae = np.std(outer_mae)
         
         print("\n" + "="*80)
         print("NESTED CV RESULTS")
         print("="*80)
         print(f"\nR²:   {mean_r2:.4f} ± {std_r2:.4f}")
         print(f"RMSE: {mean_rmse:.4f} ± {std_rmse:.4f}")
+        print(f"MAE:  {mean_mae:.4f} ± {std_mae:.4f}")
         
         # Check for overfitting signs
         if std_r2 > 0.2:
@@ -381,26 +728,31 @@ class ModelComplexityController:
             'std_r2': std_r2,
             'mean_rmse': mean_rmse,
             'std_rmse': std_rmse,
+            'mean_mae': mean_mae,
+            'std_mae': std_mae,
             'fold_scores': outer_scores,
             'fold_rmse': outer_rmse,
+            'fold_mae': outer_mae,
             'best_params_per_fold': best_params_per_fold
         }
     
     def assess_model_complexity(
         self,
         model: Any,
-        model_type: str
+        library: str = 'sklearn'
     ) -> Dict:
         """
-        Assess complexity of a trained model.
+        Assess complexity of a trained model (library-agnostic).
+        
+        Works with ANY ML library!
         
         Parameters
         ----------
-        model : sklearn model
-            Trained model
+        model : object
+            Trained model (sklearn, xgboost, lightgbm, pytorch, tensorflow, etc.)
         
-        model_type : str
-            'ridge', 'random_forest', etc.
+        library : str
+            Library type: 'sklearn', 'xgboost', 'lightgbm', 'pytorch', 'tensorflow', 'custom'
         
         Returns
         -------
@@ -408,43 +760,110 @@ class ModelComplexityController:
             Model complexity statistics
         """
         print("\n" + "="*80)
-        print("MODEL COMPLEXITY ASSESSMENT")
+        print(f"MODEL COMPLEXITY ASSESSMENT ({library.upper()})")
         print("="*80)
         
         stats = {
-            'model_type': model_type,
+            'library': library,
+            'model_class': model.__class__.__name__,
             'n_samples': self.n_samples,
             'n_features': self.n_features
         }
         
-        if model_type.lower() == 'ridge':
-            stats['n_parameters'] = self.n_features + 1  # Weights + bias
-            stats['regularization'] = model.alpha
-            
-            print(f"\nModel: Ridge Regression")
-            print(f"  Parameters: {stats['n_parameters']}")
-            print(f"  Regularization (alpha): {stats['regularization']}")
-            print(f"  Effective complexity: Controlled by alpha")
-            
-        elif model_type.lower() == 'random_forest':
-            stats['n_estimators'] = model.n_estimators
-            stats['max_depth'] = model.max_depth
-            stats['n_leaves_per_tree'] = 2 ** model.max_depth if model.max_depth else 'unlimited'
-            
-            # Rough estimate of parameters
-            if model.max_depth:
-                params_per_tree = 2 ** model.max_depth
-                stats['estimated_parameters'] = params_per_tree * model.n_estimators
-            else:
-                stats['estimated_parameters'] = 'unknown (unlimited depth)'
-            
-            print(f"\nModel: Random Forest")
-            print(f"  Trees: {stats['n_estimators']}")
-            print(f"  Max depth: {stats['max_depth']}")
-            print(f"  Estimated parameters: {stats['estimated_parameters']}")
+        # Sklearn models
+        if library == 'sklearn':
+            if hasattr(model, 'coef_'):
+                # Linear models
+                stats['n_parameters'] = self.n_features + 1
+                stats['regularization'] = getattr(model, 'alpha', 'none')
+                print(f"\nModel: {model.__class__.__name__}")
+                print(f"  Parameters: {stats['n_parameters']}")
+                print(f"  Regularization: {stats['regularization']}")
+                
+            elif hasattr(model, 'n_estimators'):
+                # Tree ensembles
+                stats['n_estimators'] = model.n_estimators
+                stats['max_depth'] = getattr(model, 'max_depth', 'unlimited')
+                
+                if stats['max_depth'] != 'unlimited':
+                    params_per_tree = 2 ** stats['max_depth']
+                    stats['estimated_parameters'] = params_per_tree * stats['n_estimators']
+                else:
+                    stats['estimated_parameters'] = 'unknown'
+                
+                print(f"\nModel: {model.__class__.__name__}")
+                print(f"  Trees: {stats['n_estimators']}")
+                print(f"  Max depth: {stats['max_depth']}")
+                print(f"  Estimated params: {stats['estimated_parameters']}")
+        
+        # XGBoost models
+        elif library == 'xgboost':
+            if hasattr(model, 'get_params'):
+                params = model.get_params()
+                stats['n_estimators'] = params.get('n_estimators', 'unknown')
+                stats['max_depth'] = params.get('max_depth', 'unknown')
+                stats['learning_rate'] = params.get('learning_rate', 'unknown')
+                
+                print(f"\nModel: XGBoost")
+                print(f"  Boosting rounds: {stats['n_estimators']}")
+                print(f"  Max depth: {stats['max_depth']}")
+                print(f"  Learning rate: {stats['learning_rate']}")
+        
+        # LightGBM models
+        elif library == 'lightgbm':
+            if hasattr(model, 'get_params'):
+                params = model.get_params()
+                stats['n_estimators'] = params.get('n_estimators', 'unknown')
+                stats['num_leaves'] = params.get('num_leaves', 'unknown')
+                stats['learning_rate'] = params.get('learning_rate', 'unknown')
+                
+                print(f"\nModel: LightGBM")
+                print(f"  Boosting rounds: {stats['n_estimators']}")
+                print(f"  Num leaves: {stats['num_leaves']}")
+                print(f"  Learning rate: {stats['learning_rate']}")
+        
+        # PyTorch models
+        elif library == 'pytorch':
+            try:
+                n_params = sum(p.numel() for p in model.parameters())
+                stats['n_parameters'] = n_params
+                
+                print(f"\nModel: PyTorch Neural Network")
+                print(f"  Total parameters: {n_params:,}")
+                
+                # Count layers
+                n_layers = len(list(model.modules())) - 1  # Exclude root
+                stats['n_layers'] = n_layers
+                print(f"  Layers: {n_layers}")
+            except:
+                print(f"\nModel: PyTorch Neural Network")
+                print(f"  (Unable to count parameters)")
+        
+        # TensorFlow models
+        elif library == 'tensorflow':
+            try:
+                if hasattr(model, 'count_params'):
+                    n_params = model.count_params()
+                    stats['n_parameters'] = n_params
+                    
+                    print(f"\nModel: TensorFlow/Keras Model")
+                    print(f"  Total parameters: {n_params:,}")
+                    
+                    if hasattr(model, 'layers'):
+                        n_layers = len(model.layers)
+                        stats['n_layers'] = n_layers
+                        print(f"  Layers: {n_layers}")
+            except:
+                print(f"\nModel: TensorFlow/Keras Model")
+                print(f"  (Unable to count parameters)")
+        
+        # Custom models
+        else:
+            print(f"\nModel: Custom ({model.__class__.__name__})")
+            print(f"  (Complexity assessment not available)")
         
         # Calculate complexity ratio
-        if isinstance(stats.get('n_parameters'), (int, float)):
+        if 'n_parameters' in stats and isinstance(stats['n_parameters'], (int, float)):
             complexity_ratio = self.n_samples / stats['n_parameters']
             stats['samples_per_parameter'] = complexity_ratio
             
@@ -464,9 +883,9 @@ class ModelComplexityController:
 
 
 def demonstrate_complexity_control():
-    """Demonstrate model complexity control."""
+    """Demonstrate model complexity control with multiple ML libraries."""
     print("\n" + "="*80)
-    print("MODEL COMPLEXITY CONTROL DEMONSTRATION")
+    print("MODEL COMPLEXITY CONTROL DEMONSTRATION (MULTI-LIBRARY)")
     print("="*80)
     
     # Simulate low-data scenario
@@ -480,18 +899,91 @@ def demonstrate_complexity_control():
         n_features=X.shape[1]
     )
     
-    # Get recommendations
+    # Get recommendations for all libraries
+    print("\n" + "="*80)
+    print("RECOMMENDATIONS FOR ALL ML LIBRARIES:")
+    print("="*80)
     recommendations = controller.recommend_models()
     
-    # Get safe parameters for Ridge
-    param_grid = controller.get_safe_param_grid('ridge')
+    # Example 1: Sklearn Ridge
+    print("\n\n" + "="*80)
+    print("EXAMPLE 1: SKLEARN RIDGE REGRESSION")
+    print("="*80)
     
-    # Run nested CV
-    results = controller.nested_cv(X, y, model_type='ridge', outer_cv=5, inner_cv=3)
+    param_grid_ridge = controller.get_safe_param_grid('ridge', library='sklearn')
+    
+    try:
+        from sklearn.linear_model import Ridge
+        model_ridge = Ridge()
+        results_ridge = controller.nested_cv(
+            X, y, 
+            model=model_ridge,
+            param_grid=param_grid_ridge,
+            library='sklearn',
+            outer_cv=3,  # Use 3 for faster demo
+            inner_cv=2
+        )
+        
+        complexity_ridge = controller.assess_model_complexity(model_ridge, library='sklearn')
+    except ImportError:
+        print("Sklearn not available - skipping Ridge example")
+    
+    # Example 2: XGBoost (if available)
+    print("\n\n" + "="*80)
+    print("EXAMPLE 2: XGBOOST (if available)")
+    print("="*80)
+    
+    try:
+        import xgboost as xgb
+        param_grid_xgb = controller.get_safe_param_grid('xgboost', library='xgboost')
+        model_xgb = xgb.XGBRegressor(random_state=42)
+        
+        results_xgb = controller.nested_cv(
+            X, y,
+            model=model_xgb,
+            param_grid=param_grid_xgb,
+            library='xgboost',
+            outer_cv=3,
+            inner_cv=2
+        )
+        
+        complexity_xgb = controller.assess_model_complexity(model_xgb, library='xgboost')
+    except ImportError:
+        print("XGBoost not available - install with: pip install xgboost")
+    
+    # Example 3: LightGBM (if available)
+    print("\n\n" + "="*80)
+    print("EXAMPLE 3: LIGHTGBM (if available)")
+    print("="*80)
+    
+    try:
+        import lightgbm as lgb
+        param_grid_lgb = controller.get_safe_param_grid('lightgbm', library='lightgbm')
+        model_lgb = lgb.LGBMRegressor(random_state=42, verbose=-1)
+        
+        results_lgb = controller.nested_cv(
+            X, y,
+            model=model_lgb,
+            param_grid=param_grid_lgb,
+            library='lightgbm',
+            outer_cv=3,
+            inner_cv=2
+        )
+        
+        complexity_lgb = controller.assess_model_complexity(model_lgb, library='lightgbm')
+    except ImportError:
+        print("LightGBM not available - install with: pip install lightgbm")
     
     print("\n" + "="*80)
-    print("✓ Demonstration complete!")
+    print("✓ Multi-library demonstration complete!")
     print("="*80)
+    print("\nThis framework supports:")
+    print("  - Scikit-learn (Ridge, RandomForest, etc.)")
+    print("  - XGBoost (XGBRegressor)")
+    print("  - LightGBM (LGBMRegressor)")
+    print("  - PyTorch (custom neural networks)")
+    print("  - TensorFlow/Keras (Sequential, Functional API)")
+    print("  - Custom models (with fit/predict interface)")
 
 
 if __name__ == '__main__':

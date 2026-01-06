@@ -2,9 +2,26 @@
 
 **A Purely Modular QSAR Validation Framework with Pitfall Mitigation**
 
-**Version 4.0.0 - Comprehensive QSAR Best Practices**
+**Version 4.1.0 - Multi-Library Support**
 
-A professional framework of **13 independent, composable modules** for QSAR validation with built-in mitigation for all common pitfalls. Perfect for the low-data regime (< 200 compounds). **We provide the building blocks, you build the workflow.**
+A professional framework of **13 independent, composable modules** for QSAR validation with built-in mitigation for all common pitfalls. Perfect for the low-data regime (< 200 compounds). **Works with ANY ML library** - sklearn, XGBoost, LightGBM, PyTorch, TensorFlow, or custom models!
+
+**We provide the building blocks, you build the workflow.**
+
+## 🎉 NEW in v4.1.0: Multi-Library Support!
+
+**No more sklearn lock-in!** The framework now works with:
+- ✅ **Scikit-learn** (Ridge, RandomForest, etc.)
+- ✅ **XGBoost** (XGBRegressor, XGBClassifier)
+- ✅ **LightGBM** (LGBMRegressor, LGBMClassifier)
+- ✅ **PyTorch** (custom neural networks)
+- ✅ **TensorFlow/Keras** (Sequential, Functional API)
+- ✅ **Custom models** (any class with fit/predict interface)
+
+Same consistent API. Maximum flexibility. Your choice!
+
+📖 **See [`MULTI_LIBRARY_SUPPORT.md`](MULTI_LIBRARY_SUPPORT.md) for complete guide!**  
+📖 **See [`examples/multi_library_examples.py`](examples/multi_library_examples.py) for working examples!**
 
 ## 🧩 Framework Philosophy
 
@@ -48,7 +65,7 @@ This framework provides **ONLY individual modules** - no all-in-one pipelines, n
 | # | Module | Mitigates | What It Does |
 |---|--------|-----------|--------------|
 | 6 | **`DatasetQualityAnalyzer`** | Dataset bias, narrow chemical space | Analyzes scaffold diversity, chemical space coverage, activity distribution |
-| 7 | **`ModelComplexityController`** | Overfitting, excessive complexity | Recommends models, restricts hyperparameters, implements nested CV |
+| 7 | **`ModelComplexityController`** ⭐ | Overfitting, excessive complexity | **Multi-library support!** Recommends models, restricts hyperparameters, nested CV (works with sklearn, XGBoost, LightGBM, PyTorch, TensorFlow) |
 | 8 | **`PerformanceValidator`** | Improper CV, wrong metrics | Proper CV reporting, comprehensive metrics, baseline comparison |
 | 9 | **`ActivityCliffsDetector`** | Activity cliffs, local instability | Identifies structure-activity cliffs, assesses severity |
 | 10 | **`UncertaintyEstimator`** | Point predictions, no confidence | Provides uncertainty estimates, confidence intervals, applicability domain |
