@@ -2,7 +2,15 @@
 
 **A Modular and Reproducible Framework**
 
-A professional, modular framework for developing and validating QSAR (Quantitative Structure-Activity Relationship) models with proper validation protocols to prevent data leakage and overfitting.
+A professional, modular, **notebook-free** framework for developing and validating QSAR (Quantitative Structure-Activity Relationship) models with proper validation protocols to prevent data leakage and overfitting in low-data regimes.
+
+## Key Features
+
+- **Notebook-Independent**: Use as a Python package in any workflow
+- **Low-Data Optimized**: Designed for datasets with < 200 compounds
+- **Modular Architecture**: 7 focused validation modules
+- **Production-Ready**: Import and use in scripts, pipelines, or applications
+- **Reproducible**: Fixed random seeds, documented protocols
 
 ## Project Structure
 
@@ -91,51 +99,101 @@ pip install -e .
 
 ## Quick Start
 
-### Using the Validation Package
+### Option 1: One-Line Validation (Minimal Code)
 
 ```python
-from src.qsar_validation import run_comprehensive_validation
+import pandas as pd
+from qsar_validation import run_comprehensive_validation
 
-# Run comprehensive validation on your dataset
-results = run_comprehensive_validation(
-    df, 
-    smiles_col='Canonical SMILES',
-    target_col='IC50 uM'
+df = pd.read_csv('your_data.csv')
+results = run_comprehensive_validation(df, smiles_col='SMILES', target_col='Activity')
+```
+
+### Option 2: Standalone Workflow Script
+
+```bash
+# Run complete workflow from command line
+python standalone_qsar_workflow.py --data your_data.csv --smiles SMILES --target Activity
+
+# Show validation checklist
+python standalone_qsar_workflow.py --checklist
+```
+
+### Option 3: Complete Python Script
+
+```python
+from qsar_validation import (
+    DatasetBiasAnalyzer,
+    ActivityCliffDetector,
+    ModelComplexityAnalyzer,
+    PerformanceMetricsCalculator
+)
+
+# Load your data
+import pandas as pd
+df = pd.read_csv('your_data.csv')
+
+# Step 1: Validate dataset
+analyzer = DatasetBiasAnalyzer('SMILES', 'Activity')
+diversity = analyzer.analyze_scaffold_diversity(df)
+
+# Step 2: Check for activity cliffs
+detector = ActivityCliffDetector('SMILES', 'Activity')
+cliffs = detector.detect_activity_cliffs(df)
+
+# Step 3: Train your model (example with sklearn)
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.model_selection import train_test_split
+
+# ... generate features (X) ...
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+
+# Use recommended settings for low data
+model = RandomForestRegressor(
+    n_estimators=50,        # Limited for low data
+    max_depth=5,            # Prevent overfitting
+    min_samples_leaf=5,
+    max_features='sqrt',
+    random_state=42
+)
+model.fit(X_train, y_train)
+
+# Step 4: Evaluate with proper metrics
+y_pred = model.predict(X_test)
+metrics = PerformanceMetricsCalculator.calculate_all_metrics(
+    y_test, y_pred, set_name="Test"
 )
 ```
 
-### Using Individual Validators
+### Option 4: Integration into Your Pipeline
 
 ```python
-from src.qsar_validation import (
-    DatasetBiasAnalyzer,
-    ActivityCliffDetector,
-    ModelComplexityAnalyzer
-)
+# preprocessing.py
+from qsar_validation import run_comprehensive_validation
 
-# Analyze dataset bias
-analyzer = DatasetBiasAnalyzer('SMILES', 'IC50')
-diversity = analyzer.analyze_scaffold_diversity(df)
+def validate_before_modeling(df):
+    results = run_comprehensive_validation(df, 'SMILES', 'pIC50')
+    
+    # Add your logic
+    if results['scaffold_diversity']['diversity_ratio'] < 0.3:
+        print("WARNING: Limited applicability domain")
+    
+    return results
 
-# Detect activity cliffs
-cliff_detector = ActivityCliffDetector('SMILES', 'IC50')
-cliffs = cliff_detector.detect_activity_cliffs(df)
-
-# Check model complexity
-ModelComplexityAnalyzer.analyze_complexity(
-    n_samples=len(df),
-    n_features=1024,
-    model_type='random_forest'
-)
+# Then use in your existing pipeline
+df = pd.read_csv('data.csv')
+validation = validate_before_modeling(df)
+# ... continue with your modeling ...
 ```
 
 ## Documentation
 
-- **[START_HERE.md](docs/START_HERE.md)** - Begin here for an overview
-- **[INDEX.md](docs/INDEX.md)** - Complete documentation index
+- **[USAGE_GUIDE.md](USAGE_GUIDE.md)** - **Complete notebook-free usage guide**
+- **[standalone_qsar_workflow.py](standalone_qsar_workflow.py)** - **Ready-to-use standalone script**
+- **[START_HERE.md](docs/START_HERE.md)** - Getting started overview
 - **[COMPREHENSIVE_VALIDATION_GUIDE.md](docs/COMPREHENSIVE_VALIDATION_GUIDE.md)** - Full validation guide
-- **[QUICK_REFERENCE_CARD.md](docs/QUICK_REFERENCE_CARD.md)** - Quick reference for validation
 - **[PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md)** - Detailed structure guide
+- **[examples/](examples/)** - Example scripts for different use cases
 
 ## Key Validation Principles
 
