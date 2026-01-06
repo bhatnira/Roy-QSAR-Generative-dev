@@ -44,10 +44,10 @@ class ActivityCliffDetector:
                 - activity_diff: Absolute difference
                 - similarity: Tanimoto similarity
         """
-        print("\n⚠️  ACTIVITY CLIFF DETECTION")
+        print("\n[WARNING]  ACTIVITY CLIFF DETECTION")
         print("=" * 70)
-        print(f"Criteria: Similarity ≥ {similarity_threshold}, "
-              f"Activity diff ≥ {activity_threshold}")
+        print(f"Criteria: Similarity >= {similarity_threshold}, "
+              f"Activity diff >= {activity_threshold}")
         
         # Generate Morgan fingerprints
         fps = self._generate_fingerprints(df[self.smiles_col])
@@ -108,14 +108,14 @@ class ActivityCliffDetector:
     def _print_results(self, cliff_df: pd.DataFrame) -> None:
         """Print activity cliff detection results."""
         if len(cliff_df) > 0:
-            print(f"\n⚠️  Found {len(cliff_df)} activity cliff pairs")
+            print(f"\n[WARNING]  Found {len(cliff_df)} activity cliff pairs")
             print(f"   Mean similarity: {cliff_df['similarity'].mean():.3f}")
             print(f"   Mean activity diff: {cliff_df['activity_diff'].mean():.3f}")
-            print("\n📌 IMPLICATIONS:")
-            print("   → Local SAR is discontinuous")
-            print("   → Fingerprint-based models may struggle")
-            print("   → Consider local models or Gaussian Processes")
-            print("   → Feature importance interpretation limited")
+            print("\n[NOTE] IMPLICATIONS:")
+            print("   -> Local SAR is discontinuous")
+            print("   -> Fingerprint-based models may struggle")
+            print("   -> Consider local models or Gaussian Processes")
+            print("   -> Feature importance interpretation limited")
         else:
-            print("\n✓ No activity cliffs detected")
-            print("  → SAR appears continuous")
+            print("\n[OK] No activity cliffs detected")
+            print("  -> SAR appears continuous")

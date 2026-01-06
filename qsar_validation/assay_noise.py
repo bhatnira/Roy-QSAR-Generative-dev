@@ -30,7 +30,7 @@ class AssayNoiseEstimator:
         Returns:
             Dictionary with error estimates and metadata
         """
-        print("\n🔬 EXPERIMENTAL ERROR ESTIMATION")
+        print("\n[ANALYSIS] EXPERIMENTAL ERROR ESTIMATION")
         print("=" * 70)
         
         # Try to calculate from replicates if available
@@ -57,7 +57,7 @@ class AssayNoiseEstimator:
         
         if errors:
             mean_error = np.mean(errors)
-            print(f"✓ Estimated from {len(errors)} replicate groups")
+            print(f"[OK] Estimated from {len(errors)} replicate groups")
             print(f"   Mean replicate error: {mean_error:.4f}")
             
             AssayNoiseEstimator._print_implications(mean_error)
@@ -88,10 +88,10 @@ class AssayNoiseEstimator:
     @staticmethod
     def _print_implications(error: float) -> None:
         """Print implications of experimental error."""
-        print("\n📌 IMPLICATION:")
+        print("\n[NOTE] IMPLICATION:")
         if error <= 0.3:
             print(f"   RMSE < {error:.1f} may indicate overfitting or lucky split")
         else:
             print(f"   RMSE < {error:.1f} may indicate overfitting or lucky split")
-        print(f"   RMSE ≈ {error:.1f} is near theoretical limit")
+        print(f"   RMSE ~ {error:.1f} is near theoretical limit")
         print("   Report model error relative to assay precision")

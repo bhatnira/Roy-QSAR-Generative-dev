@@ -24,7 +24,7 @@ class ModelComplexityAnalyzer:
             n_features: Number of features
             model_type: Type of model being used (for specific recommendations)
         """
-        print("\n🔍 MODEL COMPLEXITY ANALYSIS")
+        print("\n[INFO] MODEL COMPLEXITY ANALYSIS")
         print("=" * 70)
         
         ratio = n_samples / n_features
@@ -46,27 +46,27 @@ class ModelComplexityAnalyzer:
     def _print_general_guidelines(ratio: float) -> None:
         """Print general guidelines based on sample-to-feature ratio."""
         if ratio < 5:
-            print("\n🔴 CRITICAL: Very low samples-to-features ratio (< 5)")
-            print("   → High overfitting risk")
-            print("   → REQUIRED: Strong regularization")
-            print("   → RECOMMENDED: Feature selection or dimensionality reduction")
-            print("   → AVOID: Complex models (deep learning, unregularized ensemble)")
+            print("\n[CRITICAL] CRITICAL: Very low samples-to-features ratio (< 5)")
+            print("   -> High overfitting risk")
+            print("   -> REQUIRED: Strong regularization")
+            print("   -> RECOMMENDED: Feature selection or dimensionality reduction")
+            print("   -> AVOID: Complex models (deep learning, unregularized ensemble)")
         elif ratio < 10:
-            print("\n🟠 WARNING: Low samples-to-features ratio (< 10)")
-            print("   → Moderate overfitting risk")
-            print("   → REQUIRED: Regularization (Ridge, Lasso, ElasticNet)")
-            print("   → RECOMMENDED: Simple models (linear, regularized)")
+            print("\n[HIGH PRIORITY] WARNING: Low samples-to-features ratio (< 10)")
+            print("   -> Moderate overfitting risk")
+            print("   -> REQUIRED: Regularization (Ridge, Lasso, ElasticNet)")
+            print("   -> RECOMMENDED: Simple models (linear, regularized)")
         elif ratio < 20:
-            print("\n🟡 CAUTION: Modest samples-to-features ratio (< 20)")
-            print("   → Use cross-validation carefully")
-            print("   → RECOMMENDED: Regularized models")
+            print("\n[MODERATE] CAUTION: Modest samples-to-features ratio (< 20)")
+            print("   -> Use cross-validation carefully")
+            print("   -> RECOMMENDED: Regularized models")
         else:
-            print("\n✓ Adequate samples-to-features ratio")
+            print("\n[OK] Adequate samples-to-features ratio")
     
     @staticmethod
     def _print_model_recommendations(model_type: str, ratio: float) -> None:
         """Print model-specific recommendations."""
-        print(f"\n📌 Recommendations for {model_type}:")
+        print(f"\n[NOTE] Recommendations for {model_type}:")
         
         recommendations = {
             'deep_learning': {
@@ -120,7 +120,7 @@ class ModelComplexityAnalyzer:
         if model_key in recommendations:
             rec = recommendations[model_key]
             if ratio < rec['min_ratio']:
-                print(f"   ⚠️  Dataset size below recommended minimum ({rec['min_ratio']}:1)")
+                print(f"   [WARNING]  Dataset size below recommended minimum ({rec['min_ratio']}:1)")
             
             print("   Best practices:")
             for advice in rec['advice']:
@@ -132,7 +132,7 @@ class ModelComplexityAnalyzer:
     @staticmethod
     def _print_best_practices() -> None:
         """Print general best practices."""
-        print("\n📌 GENERAL BEST PRACTICES:")
+        print("\n[NOTE] GENERAL BEST PRACTICES:")
         print("   • Use nested cross-validation")
         print("   • Report validation metrics (not just training)")
         print("   • Compare to simple baseline (Ridge regression)")

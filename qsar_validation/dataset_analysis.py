@@ -46,7 +46,7 @@ class DatasetBiasAnalyzer:
                 - scaffold_counts: Series with scaffold frequencies
                 - df_with_scaffolds: DataFrame with scaffold column added
         """
-        print("\n🔬 DATASET BIAS ANALYSIS: Scaffold Diversity")
+        print("\n[ANALYSIS] DATASET BIAS ANALYSIS: Scaffold Diversity")
         print("=" * 70)
         
         # Extract Bemis-Murcko scaffolds
@@ -86,7 +86,7 @@ class DatasetBiasAnalyzer:
                 - Outlier detection results
                 - Warning flags
         """
-        print("\n📊 TARGET DISTRIBUTION ANALYSIS")
+        print("\n[METRICS] TARGET DISTRIBUTION ANALYSIS")
         print("=" * 70)
         
         activities = df[self.target_col].values
@@ -112,7 +112,7 @@ class DatasetBiasAnalyzer:
             val_idx: Validation set indices
             test_idx: Test set indices
         """
-        print("\n📊 SCAFFOLD DISTRIBUTION PER SPLIT")
+        print("\n[METRICS] SCAFFOLD DISTRIBUTION PER SPLIT")
         print("=" * 70)
         
         train_scaffolds = set(df_with_scaffolds.iloc[train_idx]['scaffold'])
@@ -126,12 +126,12 @@ class DatasetBiasAnalyzer:
         # Check for novel scaffolds
         novel_test = test_scaffolds - train_scaffolds
         if len(novel_test) > 0:
-            print(f"\n✓ Test set contains {len(novel_test)} novel scaffolds "
+            print(f"\n[OK] Test set contains {len(novel_test)} novel scaffolds "
                   f"({len(novel_test)/len(test_scaffolds)*100:.1f}%)")
-            print("  → Good generalization test")
+            print("  -> Good generalization test")
         else:
-            print("\n⚠️  WARNING: All test scaffolds present in training")
-            print("  → May not test generalization adequately")
+            print("\n[WARNING]  WARNING: All test scaffolds present in training")
+            print("  -> May not test generalization adequately")
     
     # Private helper methods
     
@@ -177,10 +177,10 @@ class DatasetBiasAnalyzer:
     
     def _print_diversity_results(self, metrics: Dict, scaffold_counts: pd.Series) -> None:
         """Print diversity analysis results with warnings."""
-        print(f"📊 Total molecules: {metrics['n_molecules']}")
-        print(f"📊 Unique scaffolds: {metrics['n_scaffolds']}")
-        print(f"📊 Diversity ratio: {metrics['diversity_ratio']:.3f}")
-        print(f"📊 Gini coefficient: {metrics['gini_coefficient']:.3f} "
+        print(f"[METRICS] Total molecules: {metrics['n_molecules']}")
+        print(f"[METRICS] Unique scaffolds: {metrics['n_scaffolds']}")
+        print(f"[METRICS] Diversity ratio: {metrics['diversity_ratio']:.3f}")
+        print(f"[METRICS] Gini coefficient: {metrics['gini_coefficient']:.3f} "
               "(0=perfect equality, 1=max inequality)")
         print(f"\n🔝 Top 5 scaffolds represent {metrics['top_scaffold_fraction']*100:.1f}% of dataset:")
         
@@ -189,19 +189,19 @@ class DatasetBiasAnalyzer:
         
         # Display warnings
         if metrics['diversity_ratio'] < 0.3:
-            print("\n⚠️  WARNING: Low scaffold diversity (congeneric series)")
-            print("   → Model may not generalize beyond this scaffold family")
-            print("   → Consider stating limited applicability domain")
+            print("\n[WARNING]  WARNING: Low scaffold diversity (congeneric series)")
+            print("   -> Model may not generalize beyond this scaffold family")
+            print("   -> Consider stating limited applicability domain")
         
         if metrics['top_scaffold_fraction'] > 0.5:
-            print("\n⚠️  WARNING: Dataset dominated by top scaffolds")
-            print("   → High risk of overfitting to these scaffolds")
-            print("   → Performance may be scaffold-specific")
+            print("\n[WARNING]  WARNING: Dataset dominated by top scaffolds")
+            print("   -> High risk of overfitting to these scaffolds")
+            print("   -> Performance may be scaffold-specific")
         
         if metrics['gini_coefficient'] > 0.6:
-            print("\n⚠️  WARNING: High scaffold imbalance (Gini > 0.6)")
-            print("   → Some scaffolds heavily overrepresented")
-            print("   → Consider scaffold-aware sampling")
+            print("\n[WARNING]  WARNING: High scaffold imbalance (Gini > 0.6)")
+            print("   -> Some scaffolds heavily overrepresented")
+            print("   -> Consider scaffold-aware sampling")
     
     def _calculate_activity_stats(self, activities: np.ndarray) -> Dict:
         """Calculate activity distribution statistics."""
@@ -239,20 +239,20 @@ class DatasetBiasAnalyzer:
         print(f"\nRelative range: {relative_range:.3f}")
         
         if relative_range < 2.0:
-            print("⚠️  WARNING: Narrow activity range")
-            print("   → Limited chemical space coverage")
-            print("   → R² may be artificially inflated")
-            print("   → Focus on RMSE/MAE for evaluation")
+            print("[WARNING]  WARNING: Narrow activity range")
+            print("   -> Limited chemical space coverage")
+            print("   -> R² may be artificially inflated")
+            print("   -> Focus on RMSE/MAE for evaluation")
         
         # Check for clustering
         if stats['iqr'] < 0.5 * stats['std']:
-            print("\n⚠️  WARNING: Activities clustered in narrow range")
-            print("   → Most values in small range")
-            print("   → Poor extrapolation expected")
+            print("\n[WARNING]  WARNING: Activities clustered in narrow range")
+            print("   -> Most values in small range")
+            print("   -> Poor extrapolation expected")
         
         # Report outliers
         if stats['n_outliers'] > 0:
-            print(f"\n📌 Detected {stats['n_outliers']} potential outliers "
+            print(f"\n[NOTE] Detected {stats['n_outliers']} potential outliers "
                   f"({stats['n_outliers']/len(activities)*100:.1f}%)")
-            print("   → Review for measurement errors")
-            print("   → Consider robust regression methods")
+            print("   -> Review for measurement errors")
+            print("   -> Consider robust regression methods")

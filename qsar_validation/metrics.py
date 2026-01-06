@@ -31,7 +31,7 @@ class PerformanceMetricsCalculator:
         Returns:
             Dictionary containing all calculated metrics
         """
-        print(f"\n📊 {set_name.upper()} SET PERFORMANCE METRICS")
+        print(f"\n[METRICS] {set_name.upper()} SET PERFORMANCE METRICS")
         print("=" * 70)
         
         # Calculate all metrics
@@ -75,7 +75,7 @@ class PerformanceMetricsCalculator:
         print(f"MAE:            {metrics['mae']:.4f}")
         print(f"R²:             {metrics['r2']:.4f}")
         print(f"Pearson r:      {metrics['pearson_r']:.4f} (p={metrics['pearson_p']:.4e})")
-        print(f"Spearman ρ:     {metrics['spearman_r']:.4f} (p={metrics['spearman_p']:.4e})")
+        print(f"Spearman rho:     {metrics['spearman_r']:.4f} (p={metrics['spearman_p']:.4e})")
         print(f"Max Error:      {metrics['max_error']:.4f}")
     
     @staticmethod
@@ -92,7 +92,7 @@ class PerformanceMetricsCalculator:
         Returns:
             Dictionary with baseline metrics
         """
-        print("\n📊 BASELINE MODEL PERFORMANCE (Ridge Regression)")
+        print("\n[METRICS] BASELINE MODEL PERFORMANCE (Ridge Regression)")
         print("=" * 70)
         
         if cv_folds is None:
@@ -100,7 +100,7 @@ class PerformanceMetricsCalculator:
         else:
             metrics = PerformanceMetricsCalculator._baseline_cv(X, y, cv_folds)
         
-        print("\n📌 Use this as minimum performance threshold")
+        print("\n[NOTE] Use this as minimum performance threshold")
         print("   Complex models should significantly outperform this baseline")
         
         return metrics

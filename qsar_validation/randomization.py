@@ -33,7 +33,7 @@ class YRandomizationTester:
         Returns:
             Dictionary with randomization results including mean/std metrics
         """
-        print("\n🎲 Y-RANDOMIZATION TEST (Y-SCRAMBLING)")
+        print("\n[RANDOMIZATION] Y-RANDOMIZATION TEST (Y-SCRAMBLING)")
         print("=" * 70)
         print(f"Running {n_iterations} iterations with randomized targets...")
         
@@ -121,7 +121,7 @@ class YRandomizationTester:
     @staticmethod
     def _print_results(results: Dict, n_iterations: int) -> None:
         """Print randomization results."""
-        print(f"\n📊 Randomized Results ({n_iterations} iterations):")
+        print(f"\n[METRICS] Randomized Results ({n_iterations} iterations):")
         print(f"   RMSE: {results['rmse_mean']:.4f} ± {results['rmse_std']:.4f}")
         print(f"   R²:   {results['r2_mean']:.4f} ± {results['r2_std']:.4f}")
     
@@ -131,14 +131,14 @@ class YRandomizationTester:
         r2_mean = results['r2_mean']
         
         if r2_mean > 0.2:
-            print("\n⚠️  WARNING: R² > 0.2 with randomized targets")
-            print("   → Model is likely overfitting")
-            print("   → Reduce model complexity")
-            print("   → Increase regularization")
+            print("\n[WARNING]  WARNING: R² > 0.2 with randomized targets")
+            print("   -> Model is likely overfitting")
+            print("   -> Reduce model complexity")
+            print("   -> Increase regularization")
         elif r2_mean > 0.0:
-            print("\n🟡 CAUTION: Positive R² with randomized targets")
-            print("   → Some overfitting detected")
-            print("   → Consider simplifying model")
+            print("\n[MODERATE] CAUTION: Positive R² with randomized targets")
+            print("   -> Some overfitting detected")
+            print("   -> Consider simplifying model")
         else:
-            print("\n✓ Good: R² ≤ 0 with randomized targets")
-            print("  → Model is not memorizing random noise")
+            print("\n[OK] Good: R² <= 0 with randomized targets")
+            print("  -> Model is not memorizing random noise")
