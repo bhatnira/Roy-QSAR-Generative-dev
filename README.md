@@ -110,6 +110,8 @@ This framework provides **independent, composable modules** for QSAR validation:
 | Module | Import | Purpose |
 |--------|--------|---------|
 | **QSARDataProcessor** | `from utils.qsar_utils_no_leakage import QSARDataProcessor` | SMILES canonicalization, duplicate removal, near-duplicate detection |
+| **quick_clean** ⭐ NEW | `from examples.data_cleaning_with_report import quick_clean` | Simple data cleaning with basic reporting |
+| **clean_qsar_data_with_report** ⭐ NEW | `from examples.data_cleaning_with_report import clean_qsar_data_with_report` | Detailed cleaning with comprehensive CSV reports |
 
 ### Data Splitting (3 Strategies)
 
@@ -182,6 +184,16 @@ processor = QSARDataProcessor(smiles_col='SMILES', target_col='pIC50')
 df = processor.canonicalize_smiles(df)
 df = processor.remove_duplicates(df, strategy='average')
 print(f"Clean dataset: {len(df)} molecules")
+
+# ⭐ NEW: Quick clean with basic reporting
+from examples.data_cleaning_with_report import quick_clean
+df_clean = quick_clean(df, smiles_col='SMILES', target_col='pIC50')
+
+# ⭐ NEW: Detailed clean with comprehensive CSV reports
+from examples.data_cleaning_with_report import clean_qsar_data_with_report
+df_clean, stats = clean_qsar_data_with_report(df, smiles_col='SMILES', target_col='pIC50')
+# Generates: cleaning_report_invalid_smiles.csv, cleaning_report_duplicates.csv,
+#           cleaning_report_summary.csv, cleaned_dataset.csv
 
 # Step 2: Scaffold-based split (prevents leakage!)
 splitter = AdvancedSplitter()
@@ -345,6 +357,40 @@ print(f"CV R²: {cv_results['test_r2_mean']:.3f}")
 y_pred = model.predict(X_test_scaled)
 test_r2 = r2_score(y_test, y_pred)
 print(f"Test R²: {test_r2:.3f}")
+```
+
+### Example 7: Data Cleaning with Reports ⭐ NEW
+
+```python
+import pandas as pd
+from examples.data_cleaning_with_report import quick_clean, clean_qsar_data_with_report
+
+# Load data
+df = pd.read_csv('your_data.csv')
+
+# Option 1: Quick clean (basic reporting)
+clean_df = quick_clean(df, smiles_col='SMILES', target_col='pIC50')
+# Output:
+#   Original dataset: 500 molecules
+#   Invalid SMILES removed: 5 molecules
+#   Duplicates merged: 45 molecules
+#   Clean dataset: 450 molecules
+
+# Option 2: Detailed clean (comprehensive CSV reports)
+clean_df, stats = clean_qsar_data_with_report(
+    df, 
+    smiles_col='SMILES', 
+    target_col='pIC50'
+)
+
+# Generated reports:
+# ✓ cleaning_report_invalid_smiles.csv - List of molecules that failed canonicalization
+# ✓ cleaning_report_duplicates.csv - Duplicate details with original/averaged values
+# ✓ cleaning_report_summary.csv - High-level statistics
+# ✓ cleaned_dataset.csv - Final clean dataset
+
+# Access statistics
+print(f"Invalid: {stats['invalid_count']}, Duplicates: {stats['duplicate_count']}")
 ```
 
 ---
@@ -689,13 +735,15 @@ from qsar_validation.uncertainty_estimation import UncertaintyEstimator
 
 ## 📊 Framework Statistics
 
-- **Modules:** 13+ independent modules
+- **Modules:** 13+ independent modules + 2 cleaning utilities
 - **ML Libraries:** 5+ supported (sklearn, XGBoost, LightGBM, PyTorch, TensorFlow)
 - **Splitting Strategies:** 3 (Scaffold, Temporal, Cluster)
 - **Feature Selection Methods:** 6+
 - **Metrics:** 20+ (regression + classification)
 - **Example Notebooks:** 5 complete examples
+- **Example Scripts:** 10+ ready-to-use examples
 - **Lines of Code:** 10,000+ (fully tested)
+- **Data Cleaning Reports:** 4 CSV reports generated automatically ⭐ NEW
 
 ---
 
