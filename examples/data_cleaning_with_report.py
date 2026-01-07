@@ -14,12 +14,72 @@ Output files:
 - cleaned_dataset.csv: Final clean dataset ready for modeling
 
 Usage:
-    python data_cleaning_with_report.py
+    # Quick version (no detailed reports)
+    from examples.data_cleaning_with_report import quick_clean
+    clean_df = quick_clean(df, smiles_col='Canonical SMILES', target_col='PIC50')
+    
+    # Detailed version (with reports)
+    from examples.data_cleaning_with_report import clean_qsar_data_with_report
+    clean_df, stats = clean_qsar_data_with_report(df, smiles_col='Canonical SMILES', target_col='PIC50')
 """
 
 import pandas as pd
 from utils.qsar_utils_no_leakage import QSARDataProcessor
 from qsar_validation.splitting_strategies import AdvancedSplitter
+
+
+def quick_clean(df, smiles_col='Canonical SMILES', target_col='PIC50'):
+    """
+    Quick data cleaning without detailed reports.
+    
+    This is the simple version - just cleans the data and prints basic info.
+    
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Input dataframe with SMILES and activity data
+    smiles_col : str
+        Column name containing SMILES strings
+    target_col : str
+        Column name containing activity values
+    
+    Returns
+    -------
+    pd.DataFrame
+        Cleaned dataframe
+    
+    Example
+    -------
+    >>> import pandas as pd
+    >>> from examples.data_cleaning_with_report import quick_clean
+    >>> 
+    >>> df = pd.read_csv('your_data.csv')
+    >>> clean_df = quick_clean(df, smiles_col='Canonical SMILES', target_col='PIC50')
+    >>> print(f"Clean dataset: {len(clean_df)} molecules")
+    """
+    # Initialize processor
+    processor = QSARDataProcessor(smiles_col=smiles_col, target_col=target_col)
+    
+    # Store original count
+    original_count = len(df)
+    
+    # Step 1: Canonicalize SMILES
+    df_clean = processor.canonicalize_smiles(df)
+    canonical_count = len(df_clean)
+    invalid_removed = original_count - canonical_count
+    
+    # Step 2: Remove duplicates
+    df_clean = processor.remove_duplicates(df_clean, strategy='average')
+    final_count = len(df_clean)
+    duplicates_merged = canonical_count - final_count
+    
+    # Print summary
+    print(f"Original dataset: {original_count} molecules")
+    print(f"Invalid SMILES removed: {invalid_removed} molecules")
+    print(f"Duplicates merged: {duplicates_merged} molecules")
+    print(f"Clean dataset: {final_count} molecules")
+    
+    return df_clean
 
 
 def clean_qsar_data_with_report(df, smiles_col='Canonical SMILES', target_col='PIC50'):
@@ -190,12 +250,38 @@ def clean_qsar_data_with_report(df, smiles_col='Canonical SMILES', target_col='P
 
 # Example usage
 if __name__ == "__main__":
-    # Example: Load your data
-    # df = pd.read_csv('your_data.csv')
+    print("="*80)
+    print("DATA CLEANING SCRIPT - TWO METHODS AVAILABLE")
+    print("="*80)
     
-    # Or use test data
-    print("This is a template script.")
-    print("To use it:")
-    print("1. Load your DataFrame: df = pd.read_csv('your_data.csv')")
-    print("2. Call: clean_df, stats = clean_qsar_data_with_report(df, smiles_col='SMILES', target_col='Activity')")
-    print("\nFor a working example, see the comprehensive_test/ folder.")
+    print("\n📋 METHOD 1: Quick Clean (Simple, no reports)")
+    print("-" * 80)
+    print("import pandas as pd")
+    print("from examples.data_cleaning_with_report import quick_clean")
+    print("")
+    print("df = pd.read_csv('your_data.csv')")
+    print("clean_df = quick_clean(df, smiles_col='Canonical SMILES', target_col='PIC50')")
+    print("print(f'Clean dataset: {len(clean_df)} molecules')")
+    
+    print("\n" + "="*80)
+    print("\n📊 METHOD 2: Detailed Clean (With comprehensive reports)")
+    print("-" * 80)
+    print("import pandas as pd")
+    print("from examples.data_cleaning_with_report import clean_qsar_data_with_report")
+    print("")
+    print("df = pd.read_csv('your_data.csv')")
+    print("clean_df, stats = clean_qsar_data_with_report(")
+    print("    df, ")
+    print("    smiles_col='Canonical SMILES', ")
+    print("    target_col='PIC50'")
+    print(")")
+    print("")
+    print("# Generates 4 CSV files:")
+    print("# - cleaning_report_invalid_smiles.csv")
+    print("# - cleaning_report_duplicates.csv")
+    print("# - cleaning_report_summary.csv")
+    print("# - cleaned_dataset.csv")
+    
+    print("\n" + "="*80)
+    print("For a working example with real data, see: comprehensive_test/")
+    print("="*80)
