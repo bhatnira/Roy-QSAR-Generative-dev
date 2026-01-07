@@ -173,23 +173,25 @@ pip install -r requirements.txt
 
 ```python
 import pandas as pd
-from utils.qsar_utils_no_leakage import QSARDataProcessor
 from qsar_validation.splitting_strategies import AdvancedSplitter
 
 # Load data
 df = pd.read_csv('your_data.csv')
 
-# Step 1: Clean duplicates BEFORE splitting
-processor = QSARDataProcessor(smiles_col='SMILES', target_col='pIC50')
-df = processor.canonicalize_smiles(df)
-df = processor.remove_duplicates(df, strategy='average')
-print(f"Clean dataset: {len(df)} molecules")
+# Step 1: Clean duplicates BEFORE splitting (Choose ONE method)
 
-# ⭐ NEW: Quick clean with basic reporting
+# Option A: Basic cleaning (manual control)
+from utils.qsar_utils_no_leakage import QSARDataProcessor
+processor = QSARDataProcessor(smiles_col='SMILES', target_col='pIC50')
+df_clean = processor.canonicalize_smiles(df)
+df_clean = processor.remove_duplicates(df_clean, strategy='average')
+print(f"Clean dataset: {len(df_clean)} molecules")
+
+# Option B: Quick clean with basic reporting
 from examples.data_cleaning_with_report import quick_clean
 df_clean = quick_clean(df, smiles_col='SMILES', target_col='pIC50')
 
-# ⭐ NEW: Detailed clean with comprehensive CSV reports
+# Option C: Detailed clean with comprehensive CSV reports
 from examples.data_cleaning_with_report import clean_qsar_data_with_report
 df_clean, stats = clean_qsar_data_with_report(df, smiles_col='SMILES', target_col='pIC50')
 # Generates: cleaning_report_invalid_smiles.csv, cleaning_report_duplicates.csv,
@@ -198,7 +200,7 @@ df_clean, stats = clean_qsar_data_with_report(df, smiles_col='SMILES', target_co
 # Step 2: Scaffold-based split (prevents leakage!)
 splitter = AdvancedSplitter()
 splits = splitter.scaffold_split(
-    df,
+    df_clean,  # Use cleaned data!
     smiles_col='SMILES',
     target_col='pIC50',
     test_size=0.2,
