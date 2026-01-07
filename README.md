@@ -581,7 +581,59 @@ pred_with_uncertainty = uncertainty.predict_with_uncertainty(model, X_test)
 
 ---
 
-## 🔧 Requirements
+## � Example Notebooks
+
+**Want to see the framework in action?** Check out our comprehensive Jupyter notebooks in the [`notebooks/`](notebooks/) folder!
+
+### Available Notebooks:
+
+1. **📚 DATA_LEAKAGE_FIX_EXAMPLE.ipynb**
+   - Complete tutorial on data leakage prevention
+   - Step-by-step guide with explanations
+   - Perfect starting point for beginners
+
+2. **🧪 Model_1** - Circular Fingerprints + H2O AutoML
+   - Morgan fingerprints (1024 bits)
+   - H2O AutoML with model interpretation
+   - Comprehensive SHAP analysis
+
+3. **🤖 Model_2** - ChEBERTa Embeddings + Linear Regression
+   - Transformer-based molecular embeddings
+   - Linear regression with proper validation
+   - Demonstrates embeddings workflow
+
+4. **📊 Model_3** - RDKit Features + H2O AutoML
+   - RDKit molecular descriptors
+   - H2O AutoML leaderboard
+   - Feature importance analysis
+
+5. **🎯 Model_4** - Gaussian Process + Bayesian Optimization
+   - Morgan fingerprints with GP regression
+   - Bayesian hyperparameter optimization
+   - Uncertainty quantification
+
+### Quick Start with Notebooks:
+
+```bash
+# Clone the repository
+git clone https://github.com/bhatnira/Roy-QSAR-Generative-dev.git
+cd Roy-QSAR-Generative-dev
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Launch Jupyter
+cd notebooks
+jupyter notebook
+```
+
+**The notebooks automatically detect the framework path!** Just open and run - no configuration needed.
+
+See [`notebooks/README.md`](notebooks/README.md) for detailed instructions.
+
+---
+
+## �🔧 Requirements
 
 ### Core Requirements
 - Python ≥ 3.8
@@ -638,7 +690,7 @@ We believe in:
 - **Transparency** over magic
 - **Choice** over lock-in
 
-**You are the architect. We provide the building blocks.** 🚀
+**You are the architect. We provide the building blocks.** 
 
 ---
 
