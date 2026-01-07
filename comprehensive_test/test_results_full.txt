@@ -1,0 +1,330 @@
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] Explicit valence for atom # 6 C, 5, is greater than permitted
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] SMILES Parse Error: syntax error while parsing: C(C)lc1ccc2c(c1)C(=O)Nc1ccccc1N2
+[11:05:31] SMILES Parse Error: check for mistakes around position 5:
+[11:05:31] C(C)lc1ccc2c(c1)C(=O)Nc1ccccc1N2
+[11:05:31] ~~~~^
+[11:05:31] SMILES Parse Error: Failed parsing SMILES 'C(C)lc1ccc2c(c1)C(=O)Nc1ccccc1N2' for input: 'C(C)lc1ccc2c(c1)C(=O)Nc1ccccc1N2'
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] SMILES Parse Error: syntax error while parsing: C(C)lc1ccsc1
+[11:05:31] SMILES Parse Error: check for mistakes around position 5:
+[11:05:31] C(C)lc1ccsc1
+[11:05:31] ~~~~^
+[11:05:31] SMILES Parse Error: Failed parsing SMILES 'C(C)lc1ccsc1' for input: 'C(C)lc1ccsc1'
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] SMILES Parse Error: syntax error while parsing: C(C)lc1ccc2c(c1)cccn2
+[11:05:31] SMILES Parse Error: check for mistakes around position 5:
+[11:05:31] C(C)lc1ccc2c(c1)cccn2
+[11:05:31] ~~~~^
+[11:05:31] SMILES Parse Error: Failed parsing SMILES 'C(C)lc1ccc2c(c1)cccn2' for input: 'C(C)lc1ccc2c(c1)cccn2'
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] SMILES Parse Error: syntax error while parsing: C(C)lc1ccncc1
+[11:05:31] SMILES Parse Error: check for mistakes around position 5:
+[11:05:31] C(C)lc1ccncc1
+[11:05:31] ~~~~^
+[11:05:31] SMILES Parse Error: Failed parsing SMILES 'C(C)lc1ccncc1' for input: 'C(C)lc1ccncc1'
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] Explicit valence for atom # 6 C, 5, is greater than permitted
+[11:05:31] SMILES Parse Error: syntax error while parsing: C(C)lc1ccc2c(c1)C(=O)Nc1ccccc1N2
+[11:05:31] SMILES Parse Error: check for mistakes around position 5:
+[11:05:31] C(C)lc1ccc2c(c1)C(=O)Nc1ccccc1N2
+[11:05:31] ~~~~^
+[11:05:31] SMILES Parse Error: Failed parsing SMILES 'C(C)lc1ccc2c(c1)C(=O)Nc1ccccc1N2' for input: 'C(C)lc1ccc2c(c1)C(=O)Nc1ccccc1N2'
+[11:05:31] SMILES Parse Error: syntax error while parsing: C(C)lc1ccc2c(c1)cccn2
+[11:05:31] SMILES Parse Error: check for mistakes around position 5:
+[11:05:31] C(C)lc1ccc2c(c1)cccn2
+[11:05:31] ~~~~^
+[11:05:31] SMILES Parse Error: Failed parsing SMILES 'C(C)lc1ccc2c(c1)cccn2' for input: 'C(C)lc1ccc2c(c1)cccn2'
+[11:05:31] SMILES Parse Error: syntax error while parsing: C(C)lc1ccncc1
+[11:05:31] SMILES Parse Error: check for mistakes around position 5:
+[11:05:31] C(C)lc1ccncc1
+[11:05:31] ~~~~^
+[11:05:31] SMILES Parse Error: Failed parsing SMILES 'C(C)lc1ccncc1' for input: 'C(C)lc1ccncc1'
+[11:05:31] SMILES Parse Error: syntax error while parsing: C(C)lc1ccsc1
+[11:05:31] SMILES Parse Error: check for mistakes around position 5:
+[11:05:31] C(C)lc1ccsc1
+[11:05:31] ~~~~^
+[11:05:31] SMILES Parse Error: Failed parsing SMILES 'C(C)lc1ccsc1' for input: 'C(C)lc1ccsc1'
+[11:05:31] Explicit valence for atom # 6 C, 5, is greater than permitted
+[11:05:31] Explicit valence for atom # 6 C, 5, is greater than permitted
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] SMILES Parse Error: syntax error while parsing: C(C)lc1ccc2c(c1)cccn2
+[11:05:31] SMILES Parse Error: check for mistakes around position 5:
+[11:05:31] C(C)lc1ccc2c(c1)cccn2
+[11:05:31] ~~~~^
+[11:05:31] SMILES Parse Error: Failed parsing SMILES 'C(C)lc1ccc2c(c1)cccn2' for input: 'C(C)lc1ccc2c(c1)cccn2'
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] SMILES Parse Error: syntax error while parsing: C(C)lc1ccncc1
+[11:05:31] SMILES Parse Error: check for mistakes around position 5:
+[11:05:31] C(C)lc1ccncc1
+[11:05:31] ~~~~^
+[11:05:31] SMILES Parse Error: Failed parsing SMILES 'C(C)lc1ccncc1' for input: 'C(C)lc1ccncc1'
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] Explicit valence for atom # 6 C, 5, is greater than permitted
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] Explicit valence for atom # 6 C, 5, is greater than permitted
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] SMILES Parse Error: syntax error while parsing: C(C)lc1ccc2c(c1)C(=O)Nc1ccccc1N2
+[11:05:31] SMILES Parse Error: check for mistakes around position 5:
+[11:05:31] C(C)lc1ccc2c(c1)C(=O)Nc1ccccc1N2
+[11:05:31] ~~~~^
+[11:05:31] SMILES Parse Error: Failed parsing SMILES 'C(C)lc1ccc2c(c1)C(=O)Nc1ccccc1N2' for input: 'C(C)lc1ccc2c(c1)C(=O)Nc1ccccc1N2'
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] SMILES Parse Error: syntax error while parsing: C(C)lc1ccsc1
+[11:05:31] SMILES Parse Error: check for mistakes around position 5:
+[11:05:31] C(C)lc1ccsc1
+[11:05:31] ~~~~^
+[11:05:31] SMILES Parse Error: Failed parsing SMILES 'C(C)lc1ccsc1' for input: 'C(C)lc1ccsc1'
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+[11:05:31] DEPRECATION WARNING: please use MorganGenerator
+================================================================================
+COMPREHENSIVE QSAR FRAMEWORK TEST
+================================================================================
+
+Testing imports...
+✓ QSARDataProcessor
+✓ AdvancedSplitter
+✓ FeatureScaler
+✓ FeatureSelector
+✓ PCATransformer
+✓ DatasetQualityAnalyzer
+✓ ModelComplexityController
+✓ PerformanceValidator
+✓ ActivityCliffsDetector
+✓ UncertaintyEstimator
+✓ PerformanceMetricsCalculator
+✓ DatasetBiasAnalyzer
+
+✓ All 12 modules imported successfully!
+
+================================================================================
+STEP 1: LOAD DATASET
+================================================================================
+✓ Loaded 157 molecules
+  Activity range: 4.47 - 8.05
+
+================================================================================
+MODULE 1: DUPLICATE REMOVAL
+================================================================================
+⚠ Found 136 duplicate molecules
+✓ Averaged 136 replicates
+✓ Final dataset: 62 unique molecules
+✓ Removed 95 duplicates: 157 → 62
+
+================================================================================
+MODULE 2: SPLITTING
+================================================================================
+✓ Split: Train=43, Val=6, Test=13
+
+================================================================================
+FEATURE GENERATION
+================================================================================
+✓ Using RDKit Morgan fingerprints
+  Train: (43, 512), Val: (6, 512), Test: (13, 512)
+
+================================================================================
+MODULE 3: FEATURE SCALING
+================================================================================
+
+🔧 Fitting STANDARD scaler
+  Data shape: (43, 512)
+  ✓ Fitting on TRAIN data only (no leakage)
+  Train mean: 0.034
+  Train std:  0.181
+  Transforming Train: (43, 512)
+    Scaled mean: 0.000, std: 0.663
+  Transforming Data: (6, 512)
+    Scaled mean: -0.005, std: 0.618
+  Transforming Data: (13, 512)
+    Scaled mean: -0.032, std: 0.584
+✓ Features scaled
+
+================================================================================
+MODULE 4: FEATURE SELECTION
+================================================================================
+
+🔍 Fitting VARIANCE feature selector
+  Input features: 512
+  ⚠️  Remember: Use in NESTED CV to prevent leakage!
+  Selected features: 225
+  Reduction: 512 → 225 (43.9%)
+✓ Features selected: 512 → 225
+
+================================================================================
+MODULE 5: PCA
+================================================================================
+
+📊 Fitting PCA
+  Input features: 225
+  ⚠️  Remember: Fit on TRAIN FOLD ONLY to prevent leakage!
+  PCA components: 32
+  Variance explained: 95.49%
+  Reduction: 225 → 32 (14.2%)
+✓ PCA: 225 → 32 components
+
+================================================================================
+MODULE 6: DATASET QUALITY
+================================================================================
+
+================================================================================
+DATASET QUALITY ANALYSIS
+================================================================================
+
+1. Scaffold Diversity Analysis
+--------------------------------------------------------------------------------
+  Total scaffolds: 13
+  Total molecules: 56
+  Diversity score: 0.232
+  Top scaffold represents: 25.0% of data
+
+  Top 5 scaffolds:
+    1. 14 molecules (25.0%)
+    2. 7 molecules (12.5%)
+    3. 6 molecules (10.7%)
+    4. 5 molecules (8.9%)
+    5. 5 molecules (8.9%)
+
+2. Chemical Space Analysis
+--------------------------------------------------------------------------------
+  Sampled: 56 molecules
+  Mean Tanimoto similarity: 0.139
+  Median Tanimoto similarity: 0.122
+  ✓  Chemical space is DIVERSE (mean similarity < 0.5)
+
+3. Activity Distribution Analysis
+--------------------------------------------------------------------------------
+  N samples: 62
+  Mean ± Std: 6.36 ± 0.66
+  Range: [5.16, 8.02] (2.86 log units)
+  Quartiles: Q1=5.88, Q2=6.33, Q3=6.75
+  Skewness: 0.52
+
+5. Sample Size Assessment
+--------------------------------------------------------------------------------
+  Total samples: 62
+  Typical features: 1024
+  Sample-to-feature ratio: 0.06
+  ⚠️  VERY LOW: Risk of severe overfitting
+
+================================================================================
+SUMMARY
+================================================================================
+
+Overall Quality Score: 0.67 / 1.00
+⚙️  MODERATE QUALITY dataset
+
+⚠️  2 WARNING(S):
+  ⚠️  LOW SCAFFOLD DIVERSITY: Dataset is congeneric (diversity < 0.3)
+  ⚠️  SMALL DATASET: Only 62 samples (< 100)
+
+================================================================================
+✓ Quality analyzed
+  Quality score: N/A
+  Warnings: 2
+
+================================================================================
+MODULE 7: MODEL COMPLEXITY
+================================================================================
+Traceback (most recent call last):
+  File "/Users/nb/Desktop/QSAR_Models/comprehensive_test/test_all_modules_simple.py", line 197, in <module>
+    complexity_controller = ModelComplexityController()
+TypeError: __init__() missing 2 required positional arguments: 'n_samples' and 'n_features'
