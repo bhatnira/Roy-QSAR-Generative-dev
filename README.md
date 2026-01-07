@@ -6,32 +6,36 @@ Perfect for the low-data regime (< 200 compounds). **Works with ANY ML library**
 
 [![GitHub](https://img.shields.io/badge/GitHub-Roy--QSAR--Generative--dev-blue)](https://github.com/bhatnira/Roy-QSAR-Generative-dev)
 [![Python](https://img.shields.io/badge/Python-3.8%2B-blue)](https://www.python.org/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
 ---
 
 ## 📋 Table of Contents
 
 - [Quick Start](#-quick-start)
+- [Installation](#-installation)
 - [Framework Overview](#-framework-overview)
 - [Available Modules](#-available-modules)
-- [Installation](#-installation)
 - [Usage Examples](#-usage-examples)
 - [Example Notebooks](#-example-notebooks)
 - [Google Colab Setup](#-google-colab-setup)
 - [Complete Functionality List](#-complete-functionality-list)
+- [Testing](#-testing)
 - [Troubleshooting](#-troubleshooting)
+- [Repository Structure](#-repository-structure)
+- [Contributing](#-contributing)
 
 ---
 
 ## 🚀 Quick Start
 
-### ⭐ NEW: Install Once, Use Anywhere (Recommended!)
+### ⭐ Install Once, Use Anywhere (Recommended!)
 
 ```bash
-# Install from GitHub (like RDKit!)
+# Option 1: Install from GitHub
 pip install git+https://github.com/bhatnira/Roy-QSAR-Generative-dev.git
 
-# Or install locally in editable mode
+# Option 2: Install locally in editable mode (for development)
 git clone https://github.com/bhatnira/Roy-QSAR-Generative-dev.git
 cd Roy-QSAR-Generative-dev
 pip install -e .
@@ -47,8 +51,6 @@ from qsar_validation.splitting_strategies import AdvancedSplitter
 df_clean = quick_clean(df, smiles_col='SMILES', target_col='pIC50')
 ```
 
-👉 **See [INSTALL.md](INSTALL.md) for complete installation guide**
-
 ---
 
 ### Alternative: Clone and Run (Without Installation)
@@ -61,26 +63,155 @@ cd Roy-QSAR-Generative-dev
 # 2. Install dependencies only
 pip install -r requirements.txt
 
-# 3. Use with sys.path
+# 3. Use with sys.path in your scripts
 import sys
 sys.path.insert(0, '/path/to/Roy-QSAR-Generative-dev/src')
 ```
 
-### For Google Colab Users
+---
 
+## 🔧 Installation
+
+### System Requirements
+
+- **Python:** ≥ 3.8
+- **OS:** macOS, Linux, Windows
+- **RAM:** 4GB minimum (8GB recommended)
+
+### Core Dependencies
+
+```bash
+# Required
+numpy>=1.21.0
+pandas>=1.3.0
+scipy>=1.7.0
+rdkit>=2022.3.0
+
+# Machine Learning (choose what you need)
+scikit-learn>=1.0.0      # For sklearn models
+xgboost>=1.5.0           # For XGBoost
+lightgbm>=3.3.0          # For LightGBM
+torch>=1.10.0            # For PyTorch models
+tensorflow>=2.8.0        # For TensorFlow models
+
+# Visualization
+matplotlib>=3.4.0
+seaborn>=0.11.0
+```
+
+### Installation Methods
+
+#### Method 1: Direct from GitHub (Easiest)
+
+```bash
+pip install git+https://github.com/bhatnira/Roy-QSAR-Generative-dev.git
+```
+
+After installation:
 ```python
-# Option 1: Install as package (RECOMMENDED!)
+from utils.qsar_utils_no_leakage import quick_clean
+from qsar_validation.splitting_strategies import AdvancedSplitter
+# Ready to use!
+```
+
+#### Method 2: Local Editable Install (For Development)
+
+```bash
+git clone https://github.com/bhatnira/Roy-QSAR-Generative-dev.git
+cd Roy-QSAR-Generative-dev
+pip install -e .
+```
+
+Benefits:
+- Changes to source code immediately reflected
+- No need to reinstall after modifications
+- Perfect for development and experimentation
+
+#### Method 3: Clone Without Installation
+
+```bash
+git clone https://github.com/bhatnira/Roy-QSAR-Generative-dev.git
+cd Roy-QSAR-Generative-dev
+pip install -r requirements.txt
+```
+
+Then in your scripts:
+```python
+import sys
+sys.path.insert(0, '/path/to/Roy-QSAR-Generative-dev/src')
+from utils.qsar_utils_no_leakage import QSARDataProcessor
+```
+
+### Google Colab Installation
+
+**Recommended: Install as package**
+```python
 !pip install git+https://github.com/bhatnira/Roy-QSAR-Generative-dev.git
 
 # Then import normally
 from utils.qsar_utils_no_leakage import quick_clean
-df_clean = quick_clean(df, smiles_col='SMILES', target_col='pIC50')
+```
 
-# Option 2: Clone and use paths
+**Alternative: Clone and use paths**
+```python
 !git clone https://github.com/bhatnira/Roy-QSAR-Generative-dev.git
 import sys
 sys.path.insert(0, '/content/Roy-QSAR-Generative-dev/src')
-from utils.qsar_utils_no_leakage import QSARDataProcessor
+```
+
+### Installing Optional Dependencies
+
+```bash
+# For H2O AutoML (Models 1 & 3)
+pip install h2o
+
+# For ChEBERTa embeddings (Model 2)
+pip install transformers torch
+
+# For Bayesian optimization (Model 4)
+pip install scikit-optimize
+
+# For Jupyter notebooks
+pip install jupyter ipykernel notebook
+```
+
+### Verification
+
+After installation, verify it works:
+
+```python
+import sys
+sys.path.insert(0, '/path/to/Roy-QSAR-Generative-dev/src')
+
+# Test imports
+from utils.qsar_utils_no_leakage import quick_clean
+from qsar_validation.splitting_strategies import AdvancedSplitter
+from qsar_validation.feature_scaling import FeatureScaler
+
+print("✅ Installation successful!")
+```
+
+### Troubleshooting Installation
+
+**Issue: RDKit not found**
+```bash
+# RDKit requires conda
+conda install -c conda-forge rdkit
+
+# Or use rdkit-pypi (may have limitations)
+pip install rdkit-pypi
+```
+
+**Issue: Permission denied**
+```bash
+# Add --user flag
+pip install --user git+https://github.com/bhatnira/Roy-QSAR-Generative-dev.git
+```
+
+**Issue: Old version cached**
+```bash
+# Force reinstall
+pip install --force-reinstall git+https://github.com/bhatnira/Roy-QSAR-Generative-dev.git
 ```
 
 ---
@@ -716,6 +847,95 @@ df = pd.read_csv('/content/drive/MyDrive/your_data.csv')
 - Compare to baselines
 - Run Y-randomization tests
 
+
+---
+
+## 🧪 Testing
+
+### Quick Test
+
+Verify everything is working:
+
+```bash
+cd Roy-QSAR-Generative-dev
+
+# Create test script
+cat > test_quick.py << 'EOF'
+import sys
+sys.path.insert(0, './src')
+
+print("Testing QSAR Framework...")
+try:
+    from utils.qsar_utils_no_leakage import quick_clean
+    from qsar_validation.splitting_strategies import AdvancedSplitter
+    print("✅ Imports work!")
+    print("✅ Framework is ready to use!")
+except Exception as e:
+    print(f"❌ Error: {e}")
+EOF
+
+# Run test
+python3 test_quick.py
+```
+
+### Comprehensive Test
+
+Test all functionality:
+
+```python
+import sys
+sys.path.insert(0, './src')
+import pandas as pd
+from utils.qsar_utils_no_leakage import quick_clean
+
+# Create test dataset
+test_data = pd.DataFrame({
+    'SMILES': ['CCO', 'CC(C)O', 'CCO', 'c1ccccc1'],  # With duplicate
+    'pIC50': [5.5, 6.2, 5.5, 4.8]
+})
+
+print(f"Original: {len(test_data)} rows")
+cleaned = quick_clean(test_data, 'SMILES', 'pIC50')
+print(f"Cleaned: {len(cleaned)} rows")
+
+if len(cleaned) < len(test_data):
+    print("✅ Data cleaning works correctly!")
+else:
+    print("⚠️  Check data cleaning logic")
+```
+
+### Expected Output
+
+```
+Testing QSAR Framework...
+✅ Imports work!
+✅ Framework is ready to use!
+
+Original: 4 rows
+✓ Canonicalized 4 SMILES
+⚠ Found 2 duplicate molecules
+✓ Averaged 2 replicates
+✓ Final dataset: 3 unique molecules
+Cleaned: 3 rows
+✅ Data cleaning works correctly!
+```
+
+### Running Example Scripts
+
+```bash
+# Navigate to examples folder
+cd examples
+
+# Run basic validation example
+python3 01_basic_validation.py
+
+# Run custom workflow example
+python3 02_custom_workflow.py
+
+# Test data cleaning with reports
+python3 data_cleaning_with_report.py
+```
+
 ---
 
 ## 🔍 Troubleshooting
@@ -786,6 +1006,66 @@ from qsar_validation.uncertainty_estimation import UncertaintyEstimator
 - **Example Scripts:** 10+ ready-to-use examples
 - **Lines of Code:** 10,000+ (fully tested)
 - **Data Cleaning Reports:** 4 CSV reports generated automatically ⭐ NEW
+
+---
+
+## 📁 Repository Structure
+
+```
+Roy-QSAR-Generative-dev/
+│
+├── README.md                      # This file - comprehensive documentation
+├── setup.py                       # Package configuration for pip install
+├── requirements.txt               # Python dependencies
+│
+├── src/                          # Source code
+│   ├── qsar_validation/          # Core validation modules
+│   │   ├── model_agnostic_pipeline.py
+│   │   ├── splitting_strategies.py
+│   │   ├── activity_cliffs_detection.py
+│   │   ├── dataset_quality_analysis.py
+│   │   ├── feature_scaling.py
+│   │   ├── feature_selection.py
+│   │   ├── model_complexity_control.py
+│   │   ├── performance_validation.py
+│   │   ├── uncertainty_estimation.py
+│   │   └── ... (9 more modules)
+│   │
+│   └── utils/
+│       └── qsar_utils_no_leakage.py  # Data cleaning utilities
+│
+├── examples/                     # Usage examples (8 scripts)
+│   ├── 01_basic_validation.py
+│   ├── 02_custom_workflow.py
+│   ├── data_cleaning_with_report.py
+│   ├── feature_engineering_examples.py
+│   ├── model_agnostic_examples.py
+│   ├── modular_examples.py
+│   ├── multi_library_examples.py
+│   └── splitting_strategies_examples.py
+│
+├── notebooks/                    # Jupyter notebooks (5 complete examples)
+│   ├── DATA_LEAKAGE_FIX_EXAMPLE.ipynb  ⭐ Start here!
+│   ├── Model_1_circular_fingerprint_features_1024_H20_autoML_Model_Interpretation.ipynb
+│   ├── Model_2_ChEBERTa_embedding_linear_regression_no_interpretation.ipynb
+│   ├── Model_3_rdkit_features_H20_autoML.ipynb
+│   └── Model_4_circular_fingerprint_features_1024_Gaussian_Process_Bayesian_Optimization_Model_Interpretation.ipynb
+│
+├── tests/                        # Unit tests
+│   └── ... (test modules)
+│
+└── comprehensive_test/           # Integration tests
+    └── ... (comprehensive test suite)
+```
+
+### Key Files
+
+- **README.md**: Complete documentation (you are here!)
+- **setup.py**: Package configuration for `pip install`
+- **requirements.txt**: List of all dependencies
+- **src/**: All source code (modular design)
+- **examples/**: Ready-to-run Python scripts
+- **notebooks/**: Complete Jupyter notebook examples
 
 ---
 
