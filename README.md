@@ -110,8 +110,8 @@ This framework provides **independent, composable modules** for QSAR validation:
 | Module | Import | Purpose |
 |--------|--------|---------|
 | **QSARDataProcessor** | `from utils.qsar_utils_no_leakage import QSARDataProcessor` | SMILES canonicalization, duplicate removal, near-duplicate detection |
-| **quick_clean** ⭐ NEW | `from examples.data_cleaning_with_report import quick_clean` | Simple data cleaning with basic reporting |
-| **clean_qsar_data_with_report** ⭐ NEW | `from examples.data_cleaning_with_report import clean_qsar_data_with_report` | Detailed cleaning with comprehensive CSV reports |
+| **quick_clean** ⭐ NEW | `from utils.qsar_utils_no_leakage import quick_clean` | Simple data cleaning with basic reporting |
+| **clean_qsar_data_with_report** ⭐ NEW | `from utils.qsar_utils_no_leakage import clean_qsar_data_with_report` | Detailed cleaning with comprehensive CSV reports |
 
 ### Data Splitting (3 Strategies)
 
@@ -175,9 +175,10 @@ pip install -r requirements.txt
 import pandas as pd
 import sys
 
-# Add framework to path (if not installed)
-sys.path.insert(0, '/path/to/Roy-QSAR-Generative-dev')
+# Add framework to path
+sys.path.insert(0, '/path/to/Roy-QSAR-Generative-dev/src')
 
+from utils.qsar_utils_no_leakage import QSARDataProcessor, quick_clean, clean_qsar_data_with_report
 from qsar_validation.splitting_strategies import AdvancedSplitter
 
 # Load data
@@ -186,20 +187,15 @@ df = pd.read_csv('your_data.csv')
 # Step 1: Clean duplicates BEFORE splitting (Choose ONE method)
 
 # Option A: Basic cleaning (manual control)
-from utils.qsar_utils_no_leakage import QSARDataProcessor
 processor = QSARDataProcessor(smiles_col='SMILES', target_col='pIC50')
 df_clean = processor.canonicalize_smiles(df)
 df_clean = processor.remove_duplicates(df_clean, strategy='average')
 print(f"Clean dataset: {len(df_clean)} molecules")
 
-# Option B: Quick clean with basic reporting
-sys.path.insert(0, '/path/to/Roy-QSAR-Generative-dev/examples')
-from data_cleaning_with_report import quick_clean
+# Option B: Quick clean with basic reporting ⭐ SIMPLE!
 df_clean = quick_clean(df, smiles_col='SMILES', target_col='pIC50')
 
-# Option C: Detailed clean with comprehensive CSV reports
-sys.path.insert(0, '/path/to/Roy-QSAR-Generative-dev/examples')
-from data_cleaning_with_report import clean_qsar_data_with_report
+# Option C: Detailed clean with comprehensive CSV reports ⭐ DETAILED!
 df_clean, stats = clean_qsar_data_with_report(df, smiles_col='SMILES', target_col='pIC50')
 # Generates: cleaning_report_invalid_smiles.csv, cleaning_report_duplicates.csv,
 #           cleaning_report_summary.csv, cleaned_dataset.csv
@@ -374,9 +370,9 @@ print(f"Test R²: {test_r2:.3f}")
 import pandas as pd
 import sys
 
-# Add examples folder to path
-sys.path.insert(0, '/path/to/Roy-QSAR-Generative-dev/examples')
-from data_cleaning_with_report import quick_clean, clean_qsar_data_with_report
+# Add framework to path
+sys.path.insert(0, '/path/to/Roy-QSAR-Generative-dev/src')
+from utils.qsar_utils_no_leakage import quick_clean, clean_qsar_data_with_report
 
 # Load data
 df = pd.read_csv('your_data.csv')
