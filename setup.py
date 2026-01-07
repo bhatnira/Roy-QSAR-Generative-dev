@@ -12,10 +12,10 @@ with open("requirements.txt", "r", encoding="utf-8") as fh:
 
 setup(
     name="qsar-validation-framework",
-    version="2.0.0",
+    version="4.1.0",
     author="Roy QSAR Group",
     author_email="",
-    description="A comprehensive framework for QSAR model development and validation",
+    description="Modular QSAR validation framework with data leakage prevention - Install once, use anywhere!",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/bhatnira/Roy-QSAR-Generative-dev",
@@ -31,6 +31,7 @@ setup(
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "License :: OSI Approved :: MIT License",
     ],
     python_requires=">=3.8",
     install_requires=requirements,
@@ -43,4 +44,9 @@ setup(
         ],
     },
     include_package_data=True,
+    entry_points={
+        'console_scripts': [
+            'qsar-clean=utils.qsar_utils_no_leakage:main',
+        ],
+    },
 )

@@ -25,55 +25,62 @@ Perfect for the low-data regime (< 200 compounds). **Works with ANY ML library**
 
 ## 🚀 Quick Start
 
-### For GitHub Users (Clone and Run)
+### ⭐ NEW: Install Once, Use Anywhere (Recommended!)
+
+```bash
+# Install from GitHub (like RDKit!)
+pip install git+https://github.com/bhatnira/Roy-QSAR-Generative-dev.git
+
+# Or install locally in editable mode
+git clone https://github.com/bhatnira/Roy-QSAR-Generative-dev.git
+cd Roy-QSAR-Generative-dev
+pip install -e .
+```
+
+**Then use it anywhere - no more path juggling!**
+
+```python
+# No sys.path.insert() needed!
+from utils.qsar_utils_no_leakage import quick_clean
+from qsar_validation.splitting_strategies import AdvancedSplitter
+
+df_clean = quick_clean(df, smiles_col='SMILES', target_col='pIC50')
+```
+
+👉 **See [INSTALL.md](INSTALL.md) for complete installation guide**
+
+---
+
+### Alternative: Clone and Run (Without Installation)
 
 ```bash
 # 1. Clone repository
 git clone https://github.com/bhatnira/Roy-QSAR-Generative-dev.git
 cd Roy-QSAR-Generative-dev
 
-# 2. Install dependencies
+# 2. Install dependencies only
 pip install -r requirements.txt
 
-# 3. Run example notebooks
-cd notebooks
-jupyter notebook
-# Open any notebook and run - framework loads automatically!
+# 3. Use with sys.path
+import sys
+sys.path.insert(0, '/path/to/Roy-QSAR-Generative-dev/src')
 ```
 
 ### For Google Colab Users
 
 ```python
-# Cell 1: Setup (copy-paste to first cell)
+# Option 1: Install as package (RECOMMENDED!)
+!pip install git+https://github.com/bhatnira/Roy-QSAR-Generative-dev.git
+
+# Then import normally
+from utils.qsar_utils_no_leakage import quick_clean
+df_clean = quick_clean(df, smiles_col='SMILES', target_col='pIC50')
+
+# Option 2: Clone and use paths
 !git clone https://github.com/bhatnira/Roy-QSAR-Generative-dev.git
-%cd Roy-QSAR-Generative-dev/notebooks
-!pip install -q rdkit-pypi pandas numpy scikit-learn matplotlib seaborn xgboost
-
-# Cell 2: Import framework (copy-paste to second cell)
 import sys
-sys.path.insert(0, '../src')
+sys.path.insert(0, '/content/Roy-QSAR-Generative-dev/src')
 from utils.qsar_utils_no_leakage import QSARDataProcessor
-from qsar_validation.splitting_strategies import AdvancedSplitter
-from qsar_validation.feature_scaling import FeatureScaler
-print("✅ Framework ready!")
-```
-
-### Basic Usage (Python Script)
-
-```python
-import sys
-sys.path.insert(0, '/path/to/Roy-QSAR-Generative-dev/src')
-
-from utils.qsar_utils_no_leakage import QSARDataProcessor
-from qsar_validation.splitting_strategies import AdvancedSplitter
-
-# Clean data
-processor = QSARDataProcessor(smiles_col='SMILES', target_col='Activity')
-df = processor.remove_duplicates(df, strategy='average')
-
-# Split data (scaffold-based to prevent leakage)
-splitter = AdvancedSplitter()
-splits = splitter.scaffold_split(df, smiles_col='SMILES', target_col='Activity', test_size=0.2)
 ```
 
 ---
@@ -141,6 +148,8 @@ This framework provides **independent, composable modules** for QSAR validation:
 
 ## 🔧 Installation
 
+## 🔧 Installation
+
 ### Requirements
 
 - Python ≥ 3.8
@@ -149,21 +158,50 @@ This framework provides **independent, composable modules** for QSAR validation:
 - xgboost, lightgbm (optional, for XGBoost/LightGBM)
 - torch, tensorflow (optional, for neural networks)
 
-### Install from GitHub
+### ⭐ Method 1: Install as Package (Recommended)
+
+```bash
+# Install directly from GitHub
+pip install git+https://github.com/bhatnira/Roy-QSAR-Generative-dev.git
+
+# Or clone and install in editable mode (for development)
+git clone https://github.com/bhatnira/Roy-QSAR-Generative-dev.git
+cd Roy-QSAR-Generative-dev
+pip install -e .
+```
+
+**After installation, use it anywhere:**
+```python
+from utils.qsar_utils_no_leakage import quick_clean
+from qsar_validation.splitting_strategies import AdvancedSplitter
+# No path setup needed!
+```
+
+### Method 2: Clone Without Installation
 
 ```bash
 git clone https://github.com/bhatnira/Roy-QSAR-Generative-dev.git
 cd Roy-QSAR-Generative-dev
 pip install -r requirements.txt
+
+# Then add to path in your scripts
+import sys
+sys.path.insert(0, '/path/to/Roy-QSAR-Generative-dev/src')
 ```
 
 ### Google Colab Installation
 
 ```python
+# Recommended: Install as package
+!pip install git+https://github.com/bhatnira/Roy-QSAR-Generative-dev.git
+
+# Alternative: Clone and use paths
 !git clone https://github.com/bhatnira/Roy-QSAR-Generative-dev.git
-%cd Roy-QSAR-Generative-dev
-!pip install -q rdkit-pypi pandas numpy scikit-learn matplotlib seaborn xgboost
+import sys
+sys.path.insert(0, '/content/Roy-QSAR-Generative-dev/src')
 ```
+
+👉 **Complete installation guide:** [INSTALL.md](INSTALL.md)
 
 ---
 
@@ -173,11 +211,8 @@ pip install -r requirements.txt
 
 ```python
 import pandas as pd
-import sys
 
-# Add framework to path
-sys.path.insert(0, '/path/to/Roy-QSAR-Generative-dev/src')
-
+# After pip install, just import directly!
 from utils.qsar_utils_no_leakage import QSARDataProcessor, quick_clean, clean_qsar_data_with_report
 from qsar_validation.splitting_strategies import AdvancedSplitter
 
@@ -368,10 +403,8 @@ print(f"Test R²: {test_r2:.3f}")
 
 ```python
 import pandas as pd
-import sys
 
-# Add framework to path
-sys.path.insert(0, '/path/to/Roy-QSAR-Generative-dev/src')
+# After pip install, just import!
 from utils.qsar_utils_no_leakage import quick_clean, clean_qsar_data_with_report
 
 # Load data
