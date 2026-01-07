@@ -10,7 +10,7 @@ Perfect for the low-data regime (< 200 compounds). **Works with ANY ML library**
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 
 - [Quick Start](#-quick-start)
 - [Installation](#-installation)
@@ -27,9 +27,9 @@ Perfect for the low-data regime (< 200 compounds). **Works with ANY ML library**
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
-### ⭐ Install Once, Use Anywhere (Recommended!)
+### Install Once, Use Anywhere (Recommended!)
 
 ```bash
 # Option 1: Install from GitHub
@@ -70,7 +70,7 @@ sys.path.insert(0, '/path/to/Roy-QSAR-Generative-dev/src')
 
 ---
 
-## 🔧 Installation
+## Installation
 
 ### System Requirements
 
@@ -88,11 +88,11 @@ scipy>=1.7.0
 rdkit>=2022.3.0
 
 # Machine Learning (choose what you need)
-scikit-learn>=1.0.0      # For sklearn models
-xgboost>=1.5.0           # For XGBoost
-lightgbm>=3.3.0          # For LightGBM
-torch>=1.10.0            # For PyTorch models
-tensorflow>=2.8.0        # For TensorFlow models
+scikit-learn>=1.0.0 # For sklearn models
+xgboost>=1.5.0 # For XGBoost
+lightgbm>=3.3.0 # For LightGBM
+torch>=1.10.0 # For PyTorch models
+tensorflow>=2.8.0 # For TensorFlow models
 
 # Visualization
 matplotlib>=3.4.0
@@ -188,7 +188,7 @@ from utils.qsar_utils_no_leakage import quick_clean
 from qsar_validation.splitting_strategies import AdvancedSplitter
 from qsar_validation.feature_scaling import FeatureScaler
 
-print("✅ Installation successful!")
+print(" Installation successful!")
 ```
 
 ### Troubleshooting Installation
@@ -216,7 +216,7 @@ pip install --force-reinstall git+https://github.com/bhatnira/Roy-QSAR-Generativ
 
 ---
 
-## 🎯 Framework Overview
+## Framework Overview
 
 ### Philosophy
 
@@ -225,31 +225,31 @@ pip install --force-reinstall git+https://github.com/bhatnira/Roy-QSAR-Generativ
 > **"You build the pipeline. We provide the pipes."**
 
 This framework provides **independent, composable modules** for QSAR validation:
-- ✅ No forced workflows
-- ✅ Use only what you need
-- ✅ Mix with your own code
-- ✅ Works with any ML library
+- No forced workflows
+- Use only what you need
+- Mix with your own code
+- Works with any ML library
 
 ### Key Features
 
-- 🛡️ **Data Leakage Prevention** - Scaffold-based splitting, proper scaling
-- 🧩 **Modular Design** - 13+ independent modules
-- 🔧 **Multi-Library Support** - sklearn, XGBoost, LightGBM, PyTorch, TensorFlow
-- 📊 **Comprehensive Validation** - Dataset quality, model complexity, performance metrics
-- 📓 **Example Notebooks** - 5 complete working examples
-- 🌐 **Google Colab Ready** - Works out of the box
+- **Data Leakage Prevention** - Scaffold-based splitting, proper scaling
+- **Modular Design** - 13+ independent modules
+- **Multi-Library Support** - sklearn, XGBoost, LightGBM, PyTorch, TensorFlow
+- **Comprehensive Validation** - Dataset quality, model complexity, performance metrics
+- **Example Notebooks** - 5 complete working examples
+- **Google Colab Ready** - Works out of the box
 
 ---
 
-## 📦 Available Modules
+## Available Modules
 
 ### Core Data Processing
 
 | Module | Import | Purpose |
 |--------|--------|---------|
 | **QSARDataProcessor** | `from utils.qsar_utils_no_leakage import QSARDataProcessor` | SMILES canonicalization, duplicate removal, near-duplicate detection |
-| **quick_clean** ⭐ NEW | `from utils.qsar_utils_no_leakage import quick_clean` | Simple data cleaning with basic reporting |
-| **clean_qsar_data_with_report** ⭐ NEW | `from utils.qsar_utils_no_leakage import clean_qsar_data_with_report` | Detailed cleaning with comprehensive CSV reports |
+| **quick_clean** NEW | `from utils.qsar_utils_no_leakage import quick_clean` | Simple data cleaning with basic reporting |
+| **clean_qsar_data_with_report** NEW | `from utils.qsar_utils_no_leakage import clean_qsar_data_with_report` | Detailed cleaning with comprehensive CSV reports |
 
 ### Data Splitting (3 Strategies)
 
@@ -277,9 +277,9 @@ This framework provides **independent, composable modules** for QSAR validation:
 
 ---
 
-## 🔧 Installation
+## Installation
 
-## 🔧 Installation
+## Installation
 
 ### Requirements
 
@@ -289,7 +289,7 @@ This framework provides **independent, composable modules** for QSAR validation:
 - xgboost, lightgbm (optional, for XGBoost/LightGBM)
 - torch, tensorflow (optional, for neural networks)
 
-### ⭐ Method 1: Install as Package (Recommended)
+### Method 1: Install as Package (Recommended)
 
 ```bash
 # Install directly from GitHub
@@ -332,11 +332,11 @@ import sys
 sys.path.insert(0, '/content/Roy-QSAR-Generative-dev/src')
 ```
 
-👉 **Complete installation guide:** [INSTALL.md](INSTALL.md)
+ **Complete installation guide:** [INSTALL.md](INSTALL.md)
 
 ---
 
-## 💡 Usage Examples
+## Usage Examples
 
 ### Example 1: Data Cleaning & Splitting
 
@@ -358,22 +358,22 @@ df_clean = processor.canonicalize_smiles(df)
 df_clean = processor.remove_duplicates(df_clean, strategy='average')
 print(f"Clean dataset: {len(df_clean)} molecules")
 
-# Option B: Quick clean with basic reporting ⭐ SIMPLE!
+# Option B: Quick clean with basic reporting SIMPLE!
 df_clean = quick_clean(df, smiles_col='SMILES', target_col='pIC50')
 
-# Option C: Detailed clean with comprehensive CSV reports ⭐ DETAILED!
+# Option C: Detailed clean with comprehensive CSV reports DETAILED!
 df_clean, stats = clean_qsar_data_with_report(df, smiles_col='SMILES', target_col='pIC50')
 # Generates: cleaning_report_invalid_smiles.csv, cleaning_report_duplicates.csv,
-#           cleaning_report_summary.csv, cleaned_dataset.csv
+# cleaning_report_summary.csv, cleaned_dataset.csv
 
 # Step 2: Scaffold-based split (prevents leakage!)
 splitter = AdvancedSplitter()
 splits = splitter.scaffold_split(
-    df_clean,  # Use cleaned data!
-    smiles_col='SMILES',
-    target_col='pIC50',
-    test_size=0.2,
-    val_size=0.1
+ df_clean, # Use cleaned data!
+ smiles_col='SMILES',
+ target_col='pIC50',
+ test_size=0.2,
+ val_size=0.1
 )
 
 train_idx = splits['train_idx']
@@ -433,8 +433,8 @@ from sklearn.ensemble import RandomForestRegressor
 
 # Get recommendations based on dataset size
 controller = ModelComplexityController(
-    n_samples=len(X_train),
-    n_features=X_train.shape[1]
+ n_samples=len(X_train),
+ n_features=X_train.shape[1]
 )
 
 # Check recommended models
@@ -502,7 +502,7 @@ splits = splitter.scaffold_split(df, smiles_col='SMILES', target_col='pIC50', te
 train_idx, test_idx = splits['train_idx'], splits['test_idx']
 
 # 4. Generate features (your code - fingerprints, descriptors, etc.)
-# X = generate_features(df)  # Your feature generation
+# X = generate_features(df) # Your feature generation
 
 # 5. Scale features
 scaler = FeatureScaler()
@@ -530,7 +530,7 @@ test_r2 = r2_score(y_test, y_pred)
 print(f"Test R²: {test_r2:.3f}")
 ```
 
-### Example 7: Data Cleaning with Reports ⭐ NEW
+### Example 7: Data Cleaning with Reports NEW
 
 ```python
 import pandas as pd
@@ -544,23 +544,23 @@ df = pd.read_csv('your_data.csv')
 # Option 1: Quick clean (basic reporting)
 clean_df = quick_clean(df, smiles_col='SMILES', target_col='pIC50')
 # Output:
-#   Original dataset: 500 molecules
-#   Invalid SMILES removed: 5 molecules
-#   Duplicates merged: 45 molecules
-#   Clean dataset: 450 molecules
+# Original dataset: 500 molecules
+# Invalid SMILES removed: 5 molecules
+# Duplicates merged: 45 molecules
+# Clean dataset: 450 molecules
 
 # Option 2: Detailed clean (comprehensive CSV reports)
 clean_df, stats = clean_qsar_data_with_report(
-    df, 
-    smiles_col='SMILES', 
-    target_col='pIC50'
+ df, 
+ smiles_col='SMILES', 
+ target_col='pIC50'
 )
 
 # Generated reports:
-# ✓ cleaning_report_invalid_smiles.csv - List of molecules that failed canonicalization
-# ✓ cleaning_report_duplicates.csv - Duplicate details with original/averaged values
-# ✓ cleaning_report_summary.csv - High-level statistics
-# ✓ cleaned_dataset.csv - Final clean dataset
+# cleaning_report_invalid_smiles.csv - List of molecules that failed canonicalization
+# cleaning_report_duplicates.csv - Duplicate details with original/averaged values
+# cleaning_report_summary.csv - High-level statistics
+# cleaned_dataset.csv - Final clean dataset
 
 # Access statistics
 print(f"Invalid: {stats['invalid_count']}, Duplicates: {stats['duplicate_count']}")
@@ -568,11 +568,11 @@ print(f"Invalid: {stats['invalid_count']}, Duplicates: {stats['duplicate_count']
 
 ---
 
-## 📓 Example Notebooks
+## Example Notebooks
 
 The `notebooks/` folder contains **5 complete working examples**:
 
-### 1. DATA_LEAKAGE_FIX_EXAMPLE.ipynb ⭐
+### 1. DATA_LEAKAGE_FIX_EXAMPLE.ipynb 
 **Complete tutorial on data leakage prevention**
 - Before/after comparison
 - Common mistakes explained
@@ -619,7 +619,7 @@ jupyter notebook
 
 ---
 
-## 🌐 Google Colab Setup
+## Google Colab Setup
 
 ### Universal Setup (Works for All Notebooks)
 
@@ -634,28 +634,28 @@ import sys
 
 # Check if in Colab
 try:
-    import google.colab
-    IN_COLAB = True
+ import google.colab
+ IN_COLAB = True
 except:
-    IN_COLAB = False
+ IN_COLAB = False
 
 if IN_COLAB:
-    print("🌐 Setting up Google Colab environment...")
-    
-    # Clone repository
-    if not os.path.exists('Roy-QSAR-Generative-dev'):
-        !git clone -q https://github.com/bhatnira/Roy-QSAR-Generative-dev.git
-        print("✓ Repository cloned")
-    
-    # Change directory
-    os.chdir('Roy-QSAR-Generative-dev/notebooks')
-    print(f"✓ Working directory: {os.getcwd()}")
-    
-    # Install dependencies
-    !pip install -q rdkit-pypi pandas numpy scikit-learn matplotlib seaborn xgboost
-    print("✓ Dependencies installed")
-    
-    print("✅ Setup complete!\n")
+ print(" Setting up Google Colab environment...")
+ 
+ # Clone repository
+ if not os.path.exists('Roy-QSAR-Generative-dev'):
+ !git clone -q https://github.com/bhatnira/Roy-QSAR-Generative-dev.git
+ print(" Repository cloned")
+ 
+ # Change directory
+ os.chdir('Roy-QSAR-Generative-dev/notebooks')
+ print(f" Working directory: {os.getcwd()}")
+ 
+ # Install dependencies
+ !pip install -q rdkit-pypi pandas numpy scikit-learn matplotlib seaborn xgboost
+ print(" Dependencies installed")
+ 
+ print(" Setup complete!\n")
 
 # Add framework to path (works locally and in Colab)
 repo_root = os.path.abspath(os.path.join(os.getcwd(), '..') if IN_COLAB else os.getcwd())
@@ -666,7 +666,7 @@ from utils.qsar_utils_no_leakage import QSARDataProcessor
 from qsar_validation.splitting_strategies import AdvancedSplitter
 from qsar_validation.feature_scaling import FeatureScaler
 
-print("✅ Framework loaded!")
+print(" Framework loaded!")
 ```
 
 ### Optional: Mount Google Drive (For Your Data)
@@ -699,144 +699,144 @@ df = pd.read_csv('/content/drive/MyDrive/your_data.csv')
 
 ---
 
-## 📚 Complete Functionality List
+## Complete Functionality List
 
 ### 1. Core Data Processing
 
 **QSARDataProcessor**
-- ✅ SMILES canonicalization
-- ✅ Duplicate removal (exact matches)
-- ✅ Near-duplicate detection (Tanimoto ≥ 0.95)
-- ✅ Replicate averaging
-- ✅ Data validation
+- SMILES canonicalization
+- Duplicate removal (exact matches)
+- Near-duplicate detection (Tanimoto ≥ 0.95)
+- Replicate averaging
+- Data validation
 
 ### 2. Data Splitting (3 Strategies)
 
 **AdvancedSplitter**
-- ✅ **Scaffold-based** - Bemis-Murcko scaffolds (RECOMMENDED)
-- ✅ **Temporal** - Time-based splitting
-- ✅ **Cluster-based** - Fingerprint clustering
-- ✅ Stratified splitting
-- ✅ Train/val/test support
+- **Scaffold-based** - Bemis-Murcko scaffolds (RECOMMENDED)
+- **Temporal** - Time-based splitting
+- **Cluster-based** - Fingerprint clustering
+- Stratified splitting
+- Train/val/test support
 
 ### 3. Feature Engineering
 
 **FeatureScaler**
-- ✅ StandardScaler (Z-score normalization)
-- ✅ MinMaxScaler ([0,1] scaling)
-- ✅ RobustScaler (outlier-resistant)
-- ✅ Fit on train only (prevents leakage!)
+- StandardScaler (Z-score normalization)
+- MinMaxScaler ([0,1] scaling)
+- RobustScaler (outlier-resistant)
+- Fit on train only (prevents leakage!)
 
 **FeatureSelector**
-- ✅ Variance threshold
-- ✅ Correlation filter
-- ✅ Univariate selection (F-test, mutual info)
-- ✅ Model-based selection
-- ✅ Recursive feature elimination
-- ✅ Select K best
+- Variance threshold
+- Correlation filter
+- Univariate selection (F-test, mutual info)
+- Model-based selection
+- Recursive feature elimination
+- Select K best
 
 **PCATransformer**
-- ✅ Variance-based component selection
-- ✅ Number-based selection
-- ✅ Explained variance reporting
-- ✅ Fit on train only
+- Variance-based component selection
+- Number-based selection
+- Explained variance reporting
+- Fit on train only
 
 ### 4. Dataset Quality Analysis
 
 **DatasetQualityAnalyzer**
-- ✅ Dataset size analysis
-- ✅ Scaffold diversity assessment
-- ✅ Chemical space coverage
-- ✅ Activity distribution analysis
-- ✅ Overall quality scoring
+- Dataset size analysis
+- Scaffold diversity assessment
+- Chemical space coverage
+- Activity distribution analysis
+- Overall quality scoring
 
 ### 5. Model Complexity Control
 
 **ModelComplexityController**
-- ✅ Model recommendations (based on dataset size)
-- ✅ Safe hyperparameter grids
-- ✅ Nested cross-validation
-- ✅ Overfitting detection
-- ✅ Multi-library support (sklearn, XGBoost, LightGBM, PyTorch, TensorFlow)
+- Model recommendations (based on dataset size)
+- Safe hyperparameter grids
+- Nested cross-validation
+- Overfitting detection
+- Multi-library support (sklearn, XGBoost, LightGBM, PyTorch, TensorFlow)
 
 ### 6. Performance Validation
 
 **PerformanceValidator**
-- ✅ Scaffold-based cross-validation
-- ✅ Comprehensive metrics (R², RMSE, MAE, etc.)
-- ✅ Y-randomization test (negative control)
-- ✅ Baseline comparison
-- ✅ Confidence intervals
+- Scaffold-based cross-validation
+- Comprehensive metrics (R², RMSE, MAE, etc.)
+- Y-randomization test (negative control)
+- Baseline comparison
+- Confidence intervals
 
 ### 7. Activity Analysis
 
 **ActivityCliffsDetector**
-- ✅ Activity cliff detection
-- ✅ SALI calculation
-- ✅ Severity assessment
-- ✅ Pair identification
-- ✅ Reliability scoring
+- Activity cliff detection
+- SALI calculation
+- Severity assessment
+- Pair identification
+- Reliability scoring
 
 **UncertaintyEstimator**
-- ✅ Ensemble variance
-- ✅ Bootstrap confidence intervals
-- ✅ Applicability domain
-- ✅ Prediction confidence scoring
+- Ensemble variance
+- Bootstrap confidence intervals
+- Applicability domain
+- Prediction confidence scoring
 
 ### 8. Metrics & Reporting
 
 **PerformanceMetricsCalculator**
-- ✅ Regression metrics (R², RMSE, MAE, MSE, Spearman, Kendall)
-- ✅ Classification metrics (Accuracy, Precision, Recall, F1, ROC-AUC)
-- ✅ Statistical tests (permutation, bootstrap)
-- ✅ Visualization (predicted vs actual, residuals, ROC, PR curves)
+- Regression metrics (R², RMSE, MAE, MSE, Spearman, Kendall)
+- Classification metrics (Accuracy, Precision, Recall, F1, ROC-AUC)
+- Statistical tests (permutation, bootstrap)
+- Visualization (predicted vs actual, residuals, ROC, PR curves)
 
 ---
 
-## 🎯 Key Principles
+## Key Principles
 
 ### Data Leakage Prevention
 
-1. ✅ **Remove duplicates BEFORE splitting**
-   ```python
-   df = processor.remove_duplicates(df)  # Do this first!
-   splits = splitter.scaffold_split(df)  # Then split
-   ```
+1. **Remove duplicates BEFORE splitting**
+ ```python
+ df = processor.remove_duplicates(df) # Do this first!
+ splits = splitter.scaffold_split(df) # Then split
+ ```
 
-2. ✅ **Use scaffold-based splits (not random!)**
-   ```python
-   # ✅ GOOD
-   splits = splitter.scaffold_split(df, ...)
-   
-   # ❌ BAD
-   train_test_split(X, y, random_state=42)  # Can leak!
-   ```
+2. **Use scaffold-based splits (not random!)**
+ ```python
+ # GOOD
+ splits = splitter.scaffold_split(df, ...)
+ 
+ # BAD
+ train_test_split(X, y, random_state=42) # Can leak!
+ ```
 
-3. ✅ **Generate features AFTER splitting**
-   ```python
-   splits = splitter.scaffold_split(df)
-   # Now generate features for train/test separately
-   ```
+3. **Generate features AFTER splitting**
+ ```python
+ splits = splitter.scaffold_split(df)
+ # Now generate features for train/test separately
+ ```
 
-4. ✅ **Fit scalers on train only**
-   ```python
-   # ✅ GOOD
-   scaler.fit(X_train)
-   X_train_scaled = scaler.transform(X_train)
-   X_test_scaled = scaler.transform(X_test)
-   
-   # ❌ BAD
-   scaler.fit(X_all)  # Leaks information!
-   ```
+4. **Fit scalers on train only**
+ ```python
+ # GOOD
+ scaler.fit(X_train)
+ X_train_scaled = scaler.transform(X_train)
+ X_test_scaled = scaler.transform(X_test)
+ 
+ # BAD
+ scaler.fit(X_all) # Leaks information!
+ ```
 
-5. ✅ **Use proper cross-validation**
-   ```python
-   # ✅ GOOD
-   validator.cross_validate(...)  # Uses scaffold-based folds
-   
-   # ❌ BAD
-   cross_val_score(..., cv=KFold())  # Random folds leak!
-   ```
+5. **Use proper cross-validation**
+ ```python
+ # GOOD
+ validator.cross_validate(...) # Uses scaffold-based folds
+ 
+ # BAD
+ cross_val_score(..., cv=KFold()) # Random folds leak!
+ ```
 
 ### Best Practices
 
@@ -847,10 +847,9 @@ df = pd.read_csv('/content/drive/MyDrive/your_data.csv')
 - Compare to baselines
 - Run Y-randomization tests
 
-
 ---
 
-## 🧪 Testing
+## Testing
 
 ### Quick Test
 
@@ -866,12 +865,12 @@ sys.path.insert(0, './src')
 
 print("Testing QSAR Framework...")
 try:
-    from utils.qsar_utils_no_leakage import quick_clean
-    from qsar_validation.splitting_strategies import AdvancedSplitter
-    print("✅ Imports work!")
-    print("✅ Framework is ready to use!")
+ from utils.qsar_utils_no_leakage import quick_clean
+ from qsar_validation.splitting_strategies import AdvancedSplitter
+ print(" Imports work!")
+ print(" Framework is ready to use!")
 except Exception as e:
-    print(f"❌ Error: {e}")
+ print(f" Error: {e}")
 EOF
 
 # Run test
@@ -890,8 +889,8 @@ from utils.qsar_utils_no_leakage import quick_clean
 
 # Create test dataset
 test_data = pd.DataFrame({
-    'SMILES': ['CCO', 'CC(C)O', 'CCO', 'c1ccccc1'],  # With duplicate
-    'pIC50': [5.5, 6.2, 5.5, 4.8]
+ 'SMILES': ['CCO', 'CC(C)O', 'CCO', 'c1ccccc1'], # With duplicate
+ 'pIC50': [5.5, 6.2, 5.5, 4.8]
 })
 
 print(f"Original: {len(test_data)} rows")
@@ -899,25 +898,25 @@ cleaned = quick_clean(test_data, 'SMILES', 'pIC50')
 print(f"Cleaned: {len(cleaned)} rows")
 
 if len(cleaned) < len(test_data):
-    print("✅ Data cleaning works correctly!")
+ print(" Data cleaning works correctly!")
 else:
-    print("⚠️  Check data cleaning logic")
+ print(" Check data cleaning logic")
 ```
 
 ### Expected Output
 
 ```
 Testing QSAR Framework...
-✅ Imports work!
-✅ Framework is ready to use!
+ Imports work!
+ Framework is ready to use!
 
 Original: 4 rows
-✓ Canonicalized 4 SMILES
-⚠ Found 2 duplicate molecules
-✓ Averaged 2 replicates
-✓ Final dataset: 3 unique molecules
+ Canonicalized 4 SMILES
+ Found 2 duplicate molecules
+ Averaged 2 replicates
+ Final dataset: 3 unique molecules
 Cleaned: 3 rows
-✅ Data cleaning works correctly!
+ Data cleaning works correctly!
 ```
 
 ### Running Example Scripts
@@ -938,7 +937,7 @@ python3 data_cleaning_with_report.py
 
 ---
 
-## 🔍 Troubleshooting
+## Troubleshooting
 
 ### Issue: ModuleNotFoundError
 
@@ -956,10 +955,10 @@ sys.path.insert(0, '../src')
 ### Issue: Wrong Import
 
 ```python
-# ❌ WRONG (old examples, doesn't exist)
+# WRONG (old examples, doesn't exist)
 from qsar_validation.duplicate_removal import DuplicateRemoval
 
-# ✅ CORRECT
+# CORRECT
 from utils.qsar_utils_no_leakage import QSARDataProcessor
 ```
 
@@ -995,7 +994,7 @@ from qsar_validation.uncertainty_estimation import UncertaintyEstimator
 
 ---
 
-## 📊 Framework Statistics
+## Framework Statistics
 
 - **Modules:** 13+ independent modules + 2 cleaning utilities
 - **ML Libraries:** 5+ supported (sklearn, XGBoost, LightGBM, PyTorch, TensorFlow)
@@ -1005,57 +1004,57 @@ from qsar_validation.uncertainty_estimation import UncertaintyEstimator
 - **Example Notebooks:** 5 complete examples
 - **Example Scripts:** 10+ ready-to-use examples
 - **Lines of Code:** 10,000+ (fully tested)
-- **Data Cleaning Reports:** 4 CSV reports generated automatically ⭐ NEW
+- **Data Cleaning Reports:** 4 CSV reports generated automatically NEW
 
 ---
 
-## 📁 Repository Structure
+## Repository Structure
 
 ```
 Roy-QSAR-Generative-dev/
-│
-├── README.md                      # This file - comprehensive documentation
-├── setup.py                       # Package configuration for pip install
-├── requirements.txt               # Python dependencies
-│
-├── src/                          # Source code
-│   ├── qsar_validation/          # Core validation modules
-│   │   ├── model_agnostic_pipeline.py
-│   │   ├── splitting_strategies.py
-│   │   ├── activity_cliffs_detection.py
-│   │   ├── dataset_quality_analysis.py
-│   │   ├── feature_scaling.py
-│   │   ├── feature_selection.py
-│   │   ├── model_complexity_control.py
-│   │   ├── performance_validation.py
-│   │   ├── uncertainty_estimation.py
-│   │   └── ... (9 more modules)
-│   │
-│   └── utils/
-│       └── qsar_utils_no_leakage.py  # Data cleaning utilities
-│
-├── examples/                     # Usage examples (8 scripts)
-│   ├── 01_basic_validation.py
-│   ├── 02_custom_workflow.py
-│   ├── data_cleaning_with_report.py
-│   ├── feature_engineering_examples.py
-│   ├── model_agnostic_examples.py
-│   ├── modular_examples.py
-│   ├── multi_library_examples.py
-│   └── splitting_strategies_examples.py
-│
-├── notebooks/                    # Jupyter notebooks (5 complete examples)
-│   ├── DATA_LEAKAGE_FIX_EXAMPLE.ipynb  ⭐ Start here!
-│   ├── Model_1_circular_fingerprint_features_1024_H20_autoML_Model_Interpretation.ipynb
-│   ├── Model_2_ChEBERTa_embedding_linear_regression_no_interpretation.ipynb
-│   ├── Model_3_rdkit_features_H20_autoML.ipynb
-│   └── Model_4_circular_fingerprint_features_1024_Gaussian_Process_Bayesian_Optimization_Model_Interpretation.ipynb
-│
-├── tests/                        # Unit tests
-│   └── ... (test modules)
-│
-└── comprehensive_test/           # Integration tests
-    └── ... (comprehensive test suite)
+
+ README.md # This file - comprehensive documentation
+ setup.py # Package configuration for pip install
+ requirements.txt # Python dependencies
+
+ src/ # Source code
+ qsar_validation/ # Core validation modules
+ model_agnostic_pipeline.py
+ splitting_strategies.py
+ activity_cliffs_detection.py
+ dataset_quality_analysis.py
+ feature_scaling.py
+ feature_selection.py
+ model_complexity_control.py
+ performance_validation.py
+ uncertainty_estimation.py
+ ... (9 more modules)
+ 
+ utils/
+ qsar_utils_no_leakage.py # Data cleaning utilities
+
+ examples/ # Usage examples (8 scripts)
+ 01_basic_validation.py
+ 02_custom_workflow.py
+ data_cleaning_with_report.py
+ feature_engineering_examples.py
+ model_agnostic_examples.py
+ modular_examples.py
+ multi_library_examples.py
+ splitting_strategies_examples.py
+
+ notebooks/ # Jupyter notebooks (5 complete examples)
+ DATA_LEAKAGE_FIX_EXAMPLE.ipynb Start here!
+ Model_1_circular_fingerprint_features_1024_H20_autoML_Model_Interpretation.ipynb
+ Model_2_ChEBERTa_embedding_linear_regression_no_interpretation.ipynb
+ Model_3_rdkit_features_H20_autoML.ipynb
+ Model_4_circular_fingerprint_features_1024_Gaussian_Process_Bayesian_Optimization_Model_Interpretation.ipynb
+
+ tests/ # Unit tests
+ ... (test modules)
+
+ comprehensive_test/ # Integration tests
+ ... (comprehensive test suite)
 ```
 
 ### Key Files
@@ -1069,7 +1068,7 @@ Roy-QSAR-Generative-dev/
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 Contributions welcome! Each module is independent, making it easy to:
 - Add new modules
@@ -1091,7 +1090,7 @@ python test_all_modules_simple.py
 
 ---
 
-## 📞 Support
+## Support
 
 - **Issues:** [GitHub Issues](https://github.com/bhatnira/Roy-QSAR-Generative-dev/issues)
 - **Examples:** See `notebooks/` folder
@@ -1099,7 +1098,7 @@ python test_all_modules_simple.py
 
 ---
 
-## 🌟 Citation
+## Citation
 
 If you use this framework in your research:
 
@@ -1110,7 +1109,7 @@ https://github.com/bhatnira/Roy-QSAR-Generative-dev
 
 ---
 
-## 🎓 Version History
+## Version History
 
 - **v4.1.0** (Current): Multi-library support, comprehensive validation
 - **v4.0.0**: QSAR pitfalls mitigation modules
@@ -1120,7 +1119,7 @@ https://github.com/bhatnira/Roy-QSAR-Generative-dev
 
 ---
 
-**Remember:** Each module is independent. Use what you need, ignore the rest! 🎯
+**Remember:** Each module is independent. Use what you need, ignore the rest! 
 
 **Questions?** Check the example notebooks or open an issue on GitHub!
 
@@ -1128,4 +1127,4 @@ https://github.com/bhatnira/Roy-QSAR-Generative-dev
 
 ---
 
-**Made with ❤️ for the QSAR community**
+**Made with for the QSAR community**
