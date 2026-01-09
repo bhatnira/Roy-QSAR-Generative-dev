@@ -310,7 +310,81 @@ if random_results['mean_r2'] > 0.3:
 
 ---
 
-## Key Principles
+## Advanced Validation Options
+
+### Option A: Nested (Double) Cross-Validation
+
+**Gold standard for low-data QSAR** - Prevents implicit information leakage during hyperparameter tuning.
+
+```python
+from qsar_validation.model_complexity_control import ModelComplexityController
+
+# Nested CV: Outer loop = performance, Inner loop = hyperparameter tuning
+controller = ModelComplexityController(n_samples=len(X_train), n_features=X_train.shape[1])
+
+param_grid = {
+    'max_depth': [3, 5, 7],
+    'n_estimators': [50, 100, 150]
+}
+
+results = controller.nested_cv(
+    X_train, y_train,
+    model_type='random_forest',
+    param_grid=param_grid,
+    outer_cv=5,  # Outer loop: unbiased performance
+    inner_cv=3   # Inner loop: hyperparameter tuning
+)
+print(f"Nested CV R²: {results['test_score_mean']:.3f} ± {results['test_score_std']:.3f}")
+```
+
+**Why use it?** Any operation informed by labels (feature selection, hyperparameter tuning) must occur inside the training fold only. Nested CV ensures this.
+
+### Option B: Scaffold-Based Splitting
+
+**Mimics real-world extrapolation** - Compounds split by Bemis-Murcko scaffolds or fingerprint clustering.
+
+```python
+from qsar_validation.splitting_strategies import AdvancedSplitter
+
+# Scaffold-based (recommended for diverse datasets)
+splitter = AdvancedSplitter(smiles_col='SMILES', strategy='scaffold')
+train_idx, test_idx = splitter.split(df, test_size=0.2)
+
+# Cluster-based (for congeneric series)
+splitter = AdvancedSplitter(strategy='cluster', n_clusters=5)
+train_idx, test_idx = splitter.split(df, test_size=0.2)
+```
+
+**Why use it?** Performance is lower but more realistic - no scaffold overlap between train/test means the model must extrapolate to new chemical space.
+
+### Option C: Y-Randomization (Response Permutation)
+
+**Detects chance correlations** - Activity labels are shuffled; model should collapse to random performance.
+
+```python
+from qsar_validation.performance_validation import PerformanceValidator
+
+validator = PerformanceValidator()
+
+# Shuffle labels and check if performance drops to ~0
+random_results = validator.y_randomization_test(
+    X_train, y_train, 
+    model, 
+    n_iterations=100
+)
+
+print(f"Real model R²: {real_r2:.3f}")
+print(f"Random R²: {random_results['mean_r2']:.3f} (should be ~0)")
+
+if random_results['mean_r2'] < 0.3:
+    print("✓ Model is not overfitting (random labels give poor performance)")
+else:
+    print("⚠ Potential overfitting detected!")
+```
+
+**Why use it?** If the model achieves good performance even with shuffled labels, it's memorizing patterns rather than learning true structure-activity relationships.
+
+---
 
 1. **Remove duplicates BEFORE splitting**
 2. **Use scaffold-based splits** (not random)
