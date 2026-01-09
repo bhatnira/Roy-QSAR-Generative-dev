@@ -238,6 +238,78 @@ print(f"Features: {X.shape[1]} → {X_final.shape[1]}")
 
 ---
 
+## Advanced Validation Options
+
+### (a) Nested Cross-Validation (Gold Standard for Low-Data QSAR)
+
+Prevents implicit information leakage through hyperparameter tuning:
+
+```python
+from qsar_validation.model_complexity_control import ModelComplexityController
+from sklearn.ensemble import RandomForestRegressor
+
+controller = ModelComplexityController(n_samples=len(X_train), n_features=X_train.shape[1])
+
+# Inner loop: hyperparameter tuning
+# Outer loop: unbiased performance estimation
+param_grid = controller.get_safe_param_grid('random_forest', library='sklearn')
+results = controller.nested_cv(
+    X_train, y_train,
+    model=RandomForestRegressor(),
+    param_grid=param_grid,
+    outer_cv=5,  # Outer loop for performance
+    inner_cv=3   # Inner loop for tuning
+)
+print(f"Nested CV R²: {results['test_score_mean']:.3f} ± {results['test_score_std']:.3f}")
+```
+
+**Key principle:** Any operation informed by labels (feature selection, scaling fit, hyperparameter tuning) must occur inside the training fold only.
+
+### (b) Scaffold-Based or Similarity-Aware Splitting
+
+Mimics real-world extrapolation by splitting compounds based on structure:
+
+```python
+from qsar_validation.splitting_strategies import AdvancedSplitter
+
+# Option 1: Bemis-Murcko scaffolds (recommended)
+splitter = AdvancedSplitter(strategy='scaffold')
+train_idx, test_idx = splitter.split(df, test_size=0.2)
+
+# Option 2: Clustering in fingerprint space
+splitter = AdvancedSplitter(strategy='cluster', n_clusters=5)
+train_idx, test_idx = splitter.split(df, test_size=0.2)
+```
+
+**Why:** Performance is lower but more realistic - tests generalization to new scaffolds.
+
+### (c) Y-Randomization (Response Permutation)
+
+Negative control test - detects chance correlations:
+
+```python
+from qsar_validation.performance_validation import PerformanceValidator
+
+validator = PerformanceValidator()
+
+# Shuffle activity labels - model should collapse to random performance
+random_results = validator.y_randomization_test(
+    X_train, y_train,
+    model=model,
+    n_iterations=100
+)
+
+print(f"Real model R²: {real_r2:.3f}")
+print(f"Random R²: {random_results['mean_r2']:.3f} (should be ~0)")
+
+if random_results['mean_r2'] > 0.3:
+    print("⚠️ Warning: Model may be overfitting or finding chance correlations!")
+```
+
+**Expected:** Random R² should be near 0 - if high, model is capturing noise.
+
+---
+
 ## Key Principles
 
 1. **Remove duplicates BEFORE splitting**
