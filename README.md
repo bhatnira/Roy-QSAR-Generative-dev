@@ -72,21 +72,13 @@ near_dups = processor.detect_near_duplicates(df_clean['SMILES'], threshold=0.95)
 ```python
 from qsar_validation.splitting_strategies import AdvancedSplitter
 
+# Scaffold split (recommended - prevents data leakage)
 splitter = AdvancedSplitter(smiles_col='SMILES', strategy='scaffold')
+train_idx, test_idx = splitter.split(df, test_size=0.2)
 
-# Option A: Get indices
-train_idx, val_idx, test_idx = splitter.split(df, test_size=0.2, val_size=0.1)
-
-# Option B: Direct split
-train_idx, test_idx = splitter.scaffold_split(df['SMILES'], test_size=0.2)
-
-# Temporal split (requires date column)
-splitter_temporal = AdvancedSplitter(strategy='temporal', date_col='Date')
-train_idx, test_idx = splitter_temporal.split(df, test_size=0.2)
-
-# Cluster split
-splitter_cluster = AdvancedSplitter(strategy='cluster', n_clusters=5)
-train_idx, test_idx = splitter_cluster.split(df, test_size=0.2)
+# Other strategies: 'temporal' (time-based), 'cluster' (similarity-based)
+# splitter = AdvancedSplitter(strategy='temporal', date_col='Date')
+# splitter = AdvancedSplitter(strategy='cluster', n_clusters=5)
 ```
 
 ### 3. Feature Scaling
@@ -94,18 +86,10 @@ train_idx, test_idx = splitter_cluster.split(df, test_size=0.2)
 ```python
 from qsar_validation.feature_scaling import FeatureScaler
 
-# Standard scaling (most common)
-scaler = FeatureScaler(method='standard')
+# Standard scaling (fit on train only - prevents leakage)
+scaler = FeatureScaler(method='standard')  # or 'minmax', 'robust'
 X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.transform(X_test)
-
-# MinMax scaling (0-1 range)
-scaler = FeatureScaler(method='minmax')
-X_train_scaled = scaler.fit_transform(X_train)
-
-# Robust scaling (better for outliers)
-scaler = FeatureScaler(method='robust')
-X_train_scaled = scaler.fit_transform(X_train)
 ```
 
 ### 4. Feature Selection
@@ -115,27 +99,11 @@ from qsar_validation.feature_selection import FeatureSelector
 
 selector = FeatureSelector()
 
-# Variance threshold
+# Remove low-variance features
 X_selected = selector.variance_threshold(X_train, threshold=0.01)
 X_test_selected = selector.transform(X_test)
 
-# Correlation filter
-X_selected = selector.correlation_filter(X_train, threshold=0.95)
-
-# Model-based selection (Random Forest)
-X_selected = selector.model_based_selection(
-    X_train, y_train, 
-    model='rf', 
-    n_features=100
-)
-X_test_selected = selector.transform(X_test)
-
-# Univariate selection (F-test)
-X_selected = selector.univariate_selection(
-    X_train, y_train, 
-    method='f_regression', 
-    k=100
-)
+# Other methods: correlation_filter, model_based_selection, univariate_selection
 ```
 
 ### 5. Performance Validation
@@ -145,27 +113,12 @@ from qsar_validation.performance_validation import PerformanceValidator
 
 validator = PerformanceValidator()
 
-# Calculate all metrics
-metrics = validator.calculate_comprehensive_metrics(y_test, y_pred, set_name='Test')
-print(f"R²: {metrics['r2']:.3f}")
-print(f"RMSE: {metrics['rmse']:.3f}")
-print(f"Spearman: {metrics['spearman']:.3f}")
+# Calculate metrics (R², RMSE, MAE, Spearman)
+metrics = validator.calculate_comprehensive_metrics(y_test, y_pred)
+print(f"R²: {metrics['r2']:.3f}, RMSE: {metrics['rmse']:.3f}")
 
-# Y-randomization test (negative control)
-random_results = validator.y_randomization_test(
-    X_train, y_train, 
-    model=model, 
-    n_iterations=100
-)
-print(f"Random R²: {random_results['mean_r2']:.3f} (should be ~0)")
-
-# Cross-validation
-cv_results = validator.cross_validate(
-    model, X_train, y_train, 
-    cv=5, 
-    scoring='r2'
-)
-print(f"CV R²: {cv_results['mean']:.3f} ± {cv_results['std']:.3f}")
+# Y-randomization test (negative control - should give ~0)
+random_results = validator.y_randomization_test(X_train, y_train, model, n_iterations=100)
 ```
 
 ### 6. Dataset Quality Analysis
@@ -173,22 +126,11 @@ print(f"CV R²: {cv_results['mean']:.3f} ± {cv_results['std']:.3f}")
 ```python
 from qsar_validation.dataset_quality_analysis import DatasetQualityAnalyzer
 
-analyzer = DatasetQualityAnalyzer(
-    smiles_col='SMILES',
-    activity_col='pIC50'
-)
-
+analyzer = DatasetQualityAnalyzer(smiles_col='SMILES', activity_col='pIC50')
 report = analyzer.analyze(df)
 
-# Check quality metrics
-print(f"Dataset size: {report['n_molecules']}")
-print(f"Unique scaffolds: {report['n_scaffolds']}")
-print(f"Diversity ratio: {report['diversity_ratio']:.2f}")
-print(f"Activity range: {report['activity_range']:.2f}")
-
-# Check warnings
-if report['warnings']:
-    print("Warnings:", report['warnings'])
+print(f"Scaffolds: {report['n_scaffolds']}, Diversity: {report['diversity_ratio']:.2f}")
+print(f"Warnings: {report['warnings']}")
 ```
 
 ### 7. Activity Cliffs Detection
@@ -197,20 +139,9 @@ if report['warnings']:
 from qsar_validation.activity_cliffs_detection import ActivityCliffsDetector
 
 detector = ActivityCliffsDetector()
-
-# Detect activity cliffs
-cliffs = detector.detect_cliffs(
-    df['SMILES'],
-    df['pIC50'],
-    similarity_threshold=0.85,
-    activity_threshold=1.0  # 1 log unit difference
-)
-
+cliffs = detector.detect_cliffs(df['SMILES'], df['pIC50'], 
+                                 similarity_threshold=0.85, activity_threshold=1.0)
 print(f"Activity cliffs found: {len(cliffs)}")
-
-# Calculate SALI (Structure-Activity Landscape Index)
-sali_results = detector.calculate_sali(df['SMILES'], df['pIC50'])
-print(f"Mean SALI: {sali_results['mean_sali']:.3f}")
 ```
 
 ### 8. Uncertainty Estimation
@@ -219,22 +150,8 @@ print(f"Mean SALI: {sali_results['mean_sali']:.3f}")
 from qsar_validation.uncertainty_estimation import UncertaintyEstimator
 
 estimator = UncertaintyEstimator()
-
-# Bootstrap uncertainty
-predictions, uncertainties = estimator.bootstrap_uncertainty(
-    model, X_test, 
-    n_bootstrap=100
-)
-
-print(f"Predictions: {predictions[:5]}")
-print(f"Uncertainties: {uncertainties[:5]}")
-
-# Ensemble uncertainty (requires ensemble model)
-from sklearn.ensemble import RandomForestRegressor
-ensemble_model = RandomForestRegressor(n_estimators=100)
-ensemble_model.fit(X_train, y_train)
-
-pred_mean, pred_std = estimator.ensemble_uncertainty(ensemble_model, X_test)
+predictions, uncertainties = estimator.bootstrap_uncertainty(model, X_test, n_bootstrap=100)
+print(f"Mean uncertainty: {uncertainties.mean():.3f}")
 ```
 
 ### 9. Model Complexity Control
@@ -242,29 +159,10 @@ pred_mean, pred_std = estimator.ensemble_uncertainty(ensemble_model, X_test)
 ```python
 from qsar_validation.model_complexity_control import ModelComplexityController
 
-controller = ModelComplexityController(
-    n_samples=len(X_train),
-    n_features=X_train.shape[1]
-)
-
-# Get model recommendations
+controller = ModelComplexityController(n_samples=len(X_train), n_features=X_train.shape[1])
 recommendations = controller.recommend_models()
-print("Recommended models:", recommendations)
-
-# Get safe hyperparameter grid
-from sklearn.ensemble import RandomForestRegressor
 param_grid = controller.get_safe_param_grid('random_forest', library='sklearn')
-print("Safe parameters:", param_grid)
-
-# Nested cross-validation
-results = controller.nested_cv(
-    X_train, y_train,
-    model=RandomForestRegressor(),
-    param_grid=param_grid,
-    outer_cv=5,
-    inner_cv=3
-)
-print(f"Nested CV R²: {results['test_score_mean']:.3f}")
+print("Recommended:", recommendations)
 ```
 
 ### 10. PCA (Dimensionality Reduction)
@@ -272,18 +170,10 @@ print(f"Nested CV R²: {results['test_score_mean']:.3f}")
 ```python
 from qsar_validation.pca_module import PCATransformer
 
-# Retain 95% variance
-pca = PCATransformer(n_components=0.95)
+pca = PCATransformer(n_components=0.95)  # Retain 95% variance (or use fixed number)
 X_train_pca = pca.fit_transform(X_train)
 X_test_pca = pca.transform(X_test)
-
-print(f"Original features: {X_train.shape[1]}")
-print(f"PCA components: {pca.n_components_}")
-print(f"Explained variance: {pca.explained_variance_ratio_.sum():.3f}")
-
-# Fixed number of components
-pca = PCATransformer(n_components=50)
-X_train_pca = pca.fit_transform(X_train)
+print(f"Features: {X_train.shape[1]} → {pca.n_components_}")
 ```
 
 ---
