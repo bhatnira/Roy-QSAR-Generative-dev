@@ -138,9 +138,14 @@ print(f"Warnings: {report['warnings']}")
 ```python
 from qsar_validation.activity_cliffs_detection import ActivityCliffsDetector
 
-detector = ActivityCliffsDetector()
-cliffs = detector.detect_cliffs(df['SMILES'], df['pIC50'], 
-                                 similarity_threshold=0.85, activity_threshold=1.0)
+# Set thresholds in constructor
+detector = ActivityCliffsDetector(
+    smiles_col='SMILES', 
+    activity_col='pIC50',
+    similarity_threshold=0.85,
+    activity_threshold=1.0
+)
+cliffs = detector.detect_cliffs(df)
 print(f"Activity cliffs found: {len(cliffs)}")
 ```
 
@@ -149,9 +154,10 @@ print(f"Activity cliffs found: {len(cliffs)}")
 ```python
 from qsar_validation.uncertainty_estimation import UncertaintyEstimator
 
-estimator = UncertaintyEstimator()
-predictions, uncertainties = estimator.bootstrap_uncertainty(model, X_test, n_bootstrap=100)
-print(f"Mean uncertainty: {uncertainties.mean():.3f}")
+estimator = UncertaintyEstimator(method='both')
+estimator.fit(X_train, y_train, model)  # Fit on training data first
+results = estimator.predict_with_uncertainty(X_test)
+print(f"Mean uncertainty: {results['uncertainty'].mean():.3f}")
 ```
 
 ### 9. Model Complexity Control
